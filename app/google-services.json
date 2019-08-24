@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "4089651770",
+    "firebase_url": "https://animal-crossing-calendar.firebaseio.com",
+    "project_id": "animal-crossing-calendar",
+    "storage_bucket": "animal-crossing-calendar.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:4089651770:android:f6a806aa0ccd4c1d",
+        "android_client_info": {
+          "package_name": "com.hekman.accalendar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "4089651770-673gtid9hrnbkvrpqra3umbnjbg1vici.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hekman.accalendar",
+            "certificate_hash": "ab6d57e291466ff8e092bdd1c8580403c86cc371"
+          }
+        },
+        {
+          "client_id": "4089651770-989c9479gcbvfvuj4dqqrf7qi74o82o0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQHhoV26uX5xwTIut3yLotxX5XrYvCN0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "4089651770-989c9479gcbvfvuj4dqqrf7qi74o82o0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
