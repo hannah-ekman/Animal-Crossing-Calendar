@@ -8,12 +8,57 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:4089651770:android:60badaa85111725ae3cb03",
+        "android_client_info": {
+          "package_name": "com.example.accalendar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "4089651770-v3d6bp7n86kov7l97nivtmouoem4kfdt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.accalendar",
+            "certificate_hash": "3c112fa1b6588273d1be0efd8cf277a441318b92"
+          }
+        },
+        {
+          "client_id": "4089651770-989c9479gcbvfvuj4dqqrf7qi74o82o0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQHhoV26uX5xwTIut3yLotxX5XrYvCN0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "4089651770-989c9479gcbvfvuj4dqqrf7qi74o82o0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:4089651770:android:f6a806aa0ccd4c1d",
         "android_client_info": {
           "package_name": "com.hekman.accalendar"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "4089651770-ge8u43mo0cv8eevch5j2k0j2cuae24ek.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hekman.accalendar",
+            "certificate_hash": "3c112fa1b6588273d1be0efd8cf277a441318b92"
+          }
+        },
         {
           "client_id": "4089651770-673gtid9hrnbkvrpqra3umbnjbg1vici.apps.googleusercontent.com",
           "client_type": 1,

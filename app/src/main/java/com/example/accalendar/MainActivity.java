@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     protected void updateUI(GoogleSignInAccount account){
+        System.out.println(account==null);
         if(account != null){
             Intent intent = new Intent(this, CalendarActivity.class);
             startActivity(intent);
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
 
             // Signed in successfully, show authenticated UI.
+            System.out.println("here");
             updateUI(account);
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
