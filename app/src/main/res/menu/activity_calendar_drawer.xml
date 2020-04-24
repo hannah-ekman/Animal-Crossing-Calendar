@@ -18,7 +18,7 @@
             android:title="Bugs" />
         <item
             android:id="@+id/nav_fossil"
-            android:icon="@android:drawable/ic_lock_power_off"
+            android:icon="@android:drawable/btn_star"
             android:title="Fossils" />
     </group>
 
@@ -26,7 +26,7 @@
         <menu>
             <item
                 android:id="@+id/nav_signout"
-                android:icon="@drawable/ic_menu_share"
+                android:icon="@android:drawable/ic_lock_power_off"
                 android:title="Sign Out" />
             <item
                 android:id="@+id/nav_send"
