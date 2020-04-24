@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -21,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -53,8 +55,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // status bar is hidden, so hide that too if necessary.
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
-        setContentView(R.layout.activity_main);
-
+        setContentView(R.layout.activity_opening);
+        login_redirect();
+        signup_redirect();
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -90,6 +93,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 signIn();
                 break;
         }
+    }
+
+    private Button login;
+    public void login_redirect (){
+        login = (Button)findViewById(R.id.login);
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/thicc.ttf");
+        login.setTypeface(typeface);
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent login_redirect = new Intent(MainActivity.this, login.class);
+                startActivity(login_redirect);
+            }
+        });
+    }
+
+    private Button signup;
+    public void signup_redirect (){
+        signup = (Button)findViewById(R.id.signup);
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/thicc.ttf");
+        signup.setTypeface(typeface);
+        signup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent signup_redirect = new Intent(MainActivity.this, signup.class);
+                startActivity(signup_redirect);
+            }
+        });
     }
 
     private void signIn() {

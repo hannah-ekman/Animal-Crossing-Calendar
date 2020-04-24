@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
@@ -11,34 +10,30 @@
         android:gravity="center"
         android:orientation="vertical">
 
+        //upload profile pic
+
         <EditText
-            android:id="@+id/email"
+            android:id="@+id/email2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
             android:ems="10"
-            android:fontFamily="@font/josefin_sans"
             android:hint="email"
             android:inputType="textEmailAddress" />
 
         <EditText
-            android:id="@+id/password"
+            android:id="@+id/password2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
             android:ems="10"
-            android:fontFamily="@font/josefin_sans"
             android:hint="password"
             android:inputType="textPassword" />
 
         <Button
-            android:id="@+id/login_button"
+            android:id="@+id/signup_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:background="#83D6AA"
-            android:fontFamily="@font/josefin_sans"
             android:hapticFeedbackEnabled="false"
-            android:text="Login" />
+            android:text="Sign Up"
+            android:background="#83D6AA" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
