@@ -167,26 +167,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         userData.put("fossils", new HashMap<>());
                         userData.put("furniture", new HashMap<>());
                         userData.put("recipes", new HashMap<>());
+                        userData.put("gallery", new HashMap<>());
+                        userData.put("isTimeTravel", false);
+                        userData.put("dateOffset", 0);
 
-                        db.collection("users").document(user.getUid())
-                                .set(userData)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.w(TAG, "Error writing document", e);
-                                    }
-                                });
+                        sendToFirebase(userData, user.getUid());
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
                 }
             }
         });
+    }
+
+    private void sendToFirebase(Map<String, Object> docData, String docId) {
+        db.collection("users").document(docId)
+                .set(docData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
     }
 }
