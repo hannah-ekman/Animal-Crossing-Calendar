@@ -16,7 +16,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -98,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button login;
     public void login_redirect (){
         login = (Button)findViewById(R.id.login);
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/thicc.ttf");
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
         login.setTypeface(typeface);
         login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button signup;
     public void signup_redirect (){
         signup = (Button)findViewById(R.id.signup);
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/thicc.ttf");
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
         signup.setTypeface(typeface);
         signup.setOnClickListener(new View.OnClickListener() {
             @Override

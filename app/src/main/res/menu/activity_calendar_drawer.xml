@@ -10,24 +10,24 @@
             android:title="@string/menu_home" />
         <item
             android:id="@+id/nav_fish"
-            android:icon="@drawable/fishicon"
-            android:title="Fish Tracker" />
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Fish" />
         <item
             android:id="@+id/nav_bug"
-            android:icon="@drawable/butterflyicon"
-            android:title="Bug Tracker" />
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="Bugs" />
         <item
             android:id="@+id/nav_fossil"
-            android:icon="@drawable/fossiliconpng"
-            android:title="Fossil Tracker" />
+            android:icon="@android:drawable/btn_star"
+            android:title="Fossils" />
     </group>
 
     <item android:title="Communicate">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="@string/menu_share" />
+                android:id="@+id/nav_signout"
+                android:icon="@android:drawable/ic_lock_power_off"
+                android:title="Sign Out" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"
