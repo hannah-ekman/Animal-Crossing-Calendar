@@ -1,18 +1,17 @@
 package com.example.accalendar;
 
-
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
 
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -46,7 +45,7 @@ public class signup extends AppCompatActivity {
     }
 
     public void AddUser(){
-        signup = (Button)findViewById(R.id.signup);
+        signup = (Button)findViewById(R.id.signup_button);
         //Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/thicc.ttf");
         //signup.setTypeface(typeface);
         signup.setOnClickListener(new View.OnClickListener() {
@@ -111,7 +110,7 @@ public class signup extends AppCompatActivity {
     public void onBackPressed()
     {
 
-        Intent intent=new Intent(signup.this,MainActivity.class);
+        Intent intent=new Intent(signup.this, MainPage.class);
         startActivity(intent);
     }
 

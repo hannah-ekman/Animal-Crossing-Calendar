@@ -97,8 +97,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button login;
     public void login_redirect (){
         login = (Button)findViewById(R.id.login);
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
-        login.setTypeface(typeface);
+        //Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
+        //login.setTypeface(typeface);
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button signup;
     public void signup_redirect (){
         signup = (Button)findViewById(R.id.signup);
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
-        signup.setTypeface(typeface);
+        //Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
+        //signup.setTypeface(typeface);
         signup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
