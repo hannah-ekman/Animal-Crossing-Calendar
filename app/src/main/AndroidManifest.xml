@@ -13,7 +13,7 @@
         <activity
             android:name=".CalendarActivity"
             android:label="@string/title_activity_calendar"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -28,6 +28,9 @@
             android:noHistory="true"/>
         <activity android:name=".login"
             android:label="Log In"
+            android:noHistory="true"/>
+        <activity android:name=".Fish"
+            android:label="Fish Tracker"
             android:noHistory="true"/>
         <meta-data
             android:name="preloaded_fonts"
