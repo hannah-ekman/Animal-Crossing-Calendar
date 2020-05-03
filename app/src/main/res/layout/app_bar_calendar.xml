@@ -22,6 +22,16 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+        <Switch
+            android:id="@+id/timeToggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textOn="On"
+            android:textOff="Off"
+            android:text="Time Travel"
+            android:theme="@style/Switch" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <include
@@ -37,14 +47,6 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/include2">
-        <Switch
-            android:id="@+id/timeToggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:textOn="On"
-            android:textOff="Off"
-            android:text="Time Travel" />
 
         <TextView
             android:id="@+id/travelDate"

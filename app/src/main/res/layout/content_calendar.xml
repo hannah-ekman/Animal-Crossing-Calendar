@@ -13,8 +13,9 @@
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:mcv_dateTextAppearance="@style/CustomTextAppearance"
         app:mcv_showOtherDates="all"
-        app:mcv_selectionColor="#00F"
+        app:mcv_selectionColor="#0082D2A7"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

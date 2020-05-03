@@ -3,4 +3,14 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="textGreen">#2a7a5b</color>
+    <color name="selectedGreen">#7082D2A7</color>
+    <color name="event">#8052a3a8</color>
+    <color name="popupBorder">#84b4b5</color>
+    <color name="birthday">#b3769b</color>
+    <color name="tourney">#fcc419</color>
+    <color name="resources">#ffb0b0</color>
+    <color name="special">#71b3c9</color>
+    <color name="backgroundGreen">#BCEDD2</color>
 </resources>
+
