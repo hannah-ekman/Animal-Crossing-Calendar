@@ -94,6 +94,8 @@ public class NewProfile extends AppCompatActivity {
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
+        Intent mainpage_redirect = new Intent(NewProfile.this, MainPage.class);
+        startActivity(mainpage_redirect);
     }
 
     @Override

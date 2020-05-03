@@ -144,8 +144,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             firebaseAuthWithGoogle(account);
-            Intent intent = new Intent(MainActivity.this, NewProfile.class);
-            startActivity(intent);
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
@@ -189,6 +187,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        Intent mainpage_intent = new Intent(MainActivity.this, NewProfile.class);
+                        startActivity(mainpage_intent);
                     } else {
                         Log.d(TAG, "Creating user");
                         Map<String, Object> userData = new HashMap<>();
@@ -204,6 +204,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         userData.put("dateOffset", 0);
 
                         sendToFirebase(userData, user.getUid());
+                        Intent newprofile_intent = new Intent(MainActivity.this, NewProfile.class);
+                        startActivity(newprofile_intent);
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());

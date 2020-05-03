@@ -32,6 +32,9 @@
         <activity android:name=".Fish"
             android:label="Fish Tracker"
             android:noHistory="true"/>
+        <activity android:name=".NewProfile"
+            android:label="New Profile"
+            android:noHistory="true"/>
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
