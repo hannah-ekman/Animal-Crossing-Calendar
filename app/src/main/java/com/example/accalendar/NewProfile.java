@@ -2,17 +2,27 @@ package com.example.accalendar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class NewProfile extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -22,6 +32,8 @@ public class NewProfile extends AppCompatActivity {
     EditText username;
     EditText island_name;
     Switch hemisphere_switch;
+    String userid;
+    String TAG = "newProfile";
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -56,5 +68,39 @@ public class NewProfile extends AppCompatActivity {
         FirebaseUser user = mAuth.getCurrentUser();
         String userID = user.getUid();
         Intent intent = getIntent();
+
+        db = FirebaseFirestore.getInstance();
+
+        List<String> UserList = new ArrayList<>();
+
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("Username", user_name);
+        userData.put("Island Name", islandName);
+        userData.put("Hemisphere", isNorth);
+
+        // Add a new document into the events collection
+        userid = db.collection("users").document().getId();
+        db.collection("users").document(userid)
+                .set(userData)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+
+        Intent intent=new Intent(NewProfile.this, signup.class);
+        startActivity(intent);
     }
 }

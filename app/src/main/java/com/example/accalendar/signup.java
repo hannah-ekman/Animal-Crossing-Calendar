@@ -42,6 +42,7 @@ public class signup extends AppCompatActivity {
         password2 = (EditText)findViewById(R.id.password2);
 
         AddUser();
+
     }
 
     public void AddUser(){
@@ -98,7 +99,7 @@ public class signup extends AppCompatActivity {
                         }
                     });
 
-            Intent homepage_redirect = new Intent(signup.this, MainPage.class);
+            Intent homepage_redirect = new Intent(signup.this, NewProfile.class);
             startActivity(homepage_redirect);
         } else {
 
@@ -110,7 +111,7 @@ public class signup extends AppCompatActivity {
     public void onBackPressed()
     {
 
-        Intent intent=new Intent(signup.this, MainPage.class);
+        Intent intent=new Intent(signup.this, MainActivity.class);
         startActivity(intent);
     }
 
