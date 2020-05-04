@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:paddingTop="12dp"
     android:paddingBottom="12dp">
 
@@ -10,15 +10,17 @@
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:id="@+id/eventItemSpan"
-        android:layout_centerVertical="true"/>
+        app:layout_constraintBottom_toBottomOf="@+id/eventItemList"
+        app:layout_constraintTop_toTopOf="@+id/eventItemList"/>
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/eventItemList"
         android:paddingLeft="8dp"
-        android:layout_toRightOf="@+id/eventItemSpan"
-        android:layout_centerVertical="true">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/eventItemSpan">
     </LinearLayout>
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

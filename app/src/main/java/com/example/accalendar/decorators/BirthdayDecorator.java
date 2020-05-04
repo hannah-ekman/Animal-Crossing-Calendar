@@ -36,8 +36,6 @@ public class BirthdayDecorator implements DayViewDecorator {
 }
 
 
-
-
 class DotSpanPadded implements LineBackgroundSpan {
 
     private final float radius;

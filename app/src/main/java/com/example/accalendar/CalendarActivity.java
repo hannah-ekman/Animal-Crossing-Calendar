@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import com.example.accalendar.decorators.BirthdayDecorator;
+import com.example.accalendar.decorators.CenteredDotSpan;
 import com.example.accalendar.decorators.CurrentDayDecorator;
 import com.example.accalendar.decorators.EventDecorator;
 import com.example.accalendar.decorators.ResourceDecorator;
@@ -111,8 +112,6 @@ public class CalendarActivity extends AppCompatActivity
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        getFirestore("users", user.getUid(), new String[]{"isTimeTravel", "dateOffset", "isNorthern"});
-        getFirestore("events", "yearly events", new String[0]);
         getVillagers(user.getUid());
         timeToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -133,6 +132,9 @@ public class CalendarActivity extends AppCompatActivity
                 }
             }
         });
+
+        getFirestore("users", user.getUid(), new String[]{"isTimeTravel", "dateOffset", "isNorthern"});
+        getFirestore("events", "yearly events", new String[0]);
 
         travelDate.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -297,7 +299,41 @@ public class CalendarActivity extends AppCompatActivity
         calendarView.addDecorator(currentDecorator);
         TextView dateText = findViewById(R.id.travelDate);
         dateText.setText(date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)));
+        updateSeasonalResources(date);
         calendarView.setCurrentDate(CalendarDay.from(date));
+    }
+
+    private void updateSeasonalResources(LocalDate date) {
+        LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        LinearLayout list = findViewById(R.id.seasonalList);
+        list.removeAllViews();
+        int color = Color.WHITE;
+
+        for (Map.Entry<String, Map<String, Long>> resource : resources.entrySet()) {
+            Map<String, Long> resourceInfo = resource.getValue();
+            LocalDate start = LocalDate.of(date.getYear(),
+                    resourceInfo.get("start month").intValue(),
+                    resourceInfo.get("start day").intValue());
+            LocalDate end = LocalDate.of(date.getYear(),
+                    resourceInfo.get("end month").intValue(),
+                    resourceInfo.get("end day").intValue());
+
+            if (date.isEqual(start) || date.isEqual(end) ||
+                    (date.isAfter(start) && date.isBefore(end))) {
+                View resourceListItem = layoutInflater.inflate(R.layout.resource_list_item, null);
+                TextView resourceSpan = resourceListItem.findViewById(R.id.resourceItemSpan);
+                TextView resourceText = resourceListItem.findViewById(R.id.resourceItemText);
+                SpannableString resourceString = new SpannableString(" ");
+                resourceString.setSpan(new CenteredDotSpan(10, color), 0, resourceString.length(), 0);
+                resourceText.setTextSize(16);
+                Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
+                resourceText.setTypeface(typeface);
+                resourceSpan.setText(resourceString);
+                resourceText.setText(resource.getKey() + " ending on: " +
+                        end.getMonthValue() + "/" + end.getDayOfMonth());
+                list.addView(resourceListItem);
+            }
+        }
     }
 
     private void updateFieldVars(DocumentSnapshot doc, String[] fields) {
@@ -486,11 +522,11 @@ public class CalendarActivity extends AppCompatActivity
                 Map<String, Long> dateInfo = (Map<String, Long>) entry.getValue();
                 resources.put(entry.getKey(), dateInfo);
             }
-
             MaterialCalendarView calendar = findViewById(R.id.calendarView);
             calendar.addDecorator(new ResourceDecorator(
                     ResourcesCompat.getColor(getResources(), R.color.resources, null),
                     resources));
+            updateCalendarDate(dateOffset);
         }
     }
 
