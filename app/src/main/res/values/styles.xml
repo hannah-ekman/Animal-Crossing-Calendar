@@ -32,15 +32,14 @@
         <item name="colorControlActivated">@color/event</item>
 
         <!-- inactive thumb color -->
-        <item name="colorSwitchThumbNormal">#f1f1f1
-        </item>
+        <item name="colorSwitchThumbNormal">#f1f1f1</item>
 
         <!-- inactive track color (30% transparency) -->
-        <item name="android:colorForeground">#42221f1f
-        </item>
+        <item name="android:colorForeground">#42221f1f</item>
     </style>
-    <style name="CustomTextAppearance" parent="TextAppearance.MaterialCalendarWidget.Date">
-        <item name="android:textColor">@color/datetextcolor</item>
+
+    <style name="calendarFont">
+        <item name="android:fontFamily">@font/josefin_sans</item>
     </style>
 
 </resources>

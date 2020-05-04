@@ -3,6 +3,7 @@ package com.example.accalendar;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.icu.util.Calendar;
 import android.os.Build;
@@ -105,6 +106,7 @@ public class CalendarActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Switch timeToggle = findViewById(R.id.timeToggle);
+        timeToggle.setTypeface(Typeface.createFromAsset(getAssets(), "fonts/josefin_sans_semibold.ttf"));
         final TextView travelDate = findViewById(R.id.travelDate);
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -127,7 +129,7 @@ public class CalendarActivity extends AppCompatActivity
                         put("dateOffset", dateOffset);
                     }});
                     updateCalendarDate(dateOffset);
-                    travelDate.setVisibility(View.GONE);
+                    travelDate.setVisibility(View.INVISIBLE);
                 }
             }
         });
@@ -184,6 +186,8 @@ public class CalendarActivity extends AppCompatActivity
         if(eventViews.size() > 0) {
             View popView = layoutInflater.inflate(R.layout.calendar_popup, null);
             TextView title = popView.findViewById(R.id.cardtitle);
+            Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin_sans_semibold.ttf");
+            title.setTypeface(typeface);
             ListView list = popView.findViewById(R.id.eventList);
             EventAdapter listAdapter = new EventAdapter(popView.getContext(), eventViews);
             list.setAdapter(listAdapter);
@@ -270,6 +274,8 @@ public class CalendarActivity extends AppCompatActivity
                 event.setText(eventName);
                 event.setTextColor(Color.DKGRAY);
                 event.setTextSize(16);
+                Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
+                event.setTypeface(typeface);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
                 event.setLayoutParams(params);
