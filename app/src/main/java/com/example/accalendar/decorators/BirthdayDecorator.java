@@ -2,6 +2,8 @@ package com.example.accalendar.decorators;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.text.Spanned;
 import android.text.style.LineBackgroundSpan;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
@@ -12,12 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class BirthdayDecorator implements DayViewDecorator {
-    private final int color;
     private final Map<String, HashMap<String, Object>> dates;
+    private final Drawable d;
 
-    public BirthdayDecorator(int color, Map<String, HashMap<String, Object>> dates) {
-        this.color = color;
+    public BirthdayDecorator(Map<String, HashMap<String, Object>> dates, Drawable d) {
         this.dates = new HashMap<>(dates);
+        this.d = d;
     }
 
     @Override
@@ -31,7 +33,8 @@ public class BirthdayDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.addSpan(new DotSpanPadded(7, color, 2));
+        DecoratorImageSpan decorator = new DecoratorImageSpan(d, 2);
+        view.addSpan(decorator);
     }
 }
 

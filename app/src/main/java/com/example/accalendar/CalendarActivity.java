@@ -5,18 +5,21 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.icu.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
 
 import com.example.accalendar.decorators.BirthdayDecorator;
-import com.example.accalendar.decorators.CenteredDotSpan;
 import com.example.accalendar.decorators.CurrentDayDecorator;
 import com.example.accalendar.decorators.EventDecorator;
 import com.example.accalendar.decorators.ResourceDecorator;
 import com.example.accalendar.decorators.SpecialDecorator;
 import com.example.accalendar.decorators.TourneyDecorator;
 import com.example.accalendar.listviewadapters.EventAdapter;
+import com.example.accalendar.utils.DocSnapToData;
+import com.example.accalendar.utils.InflateLayouts;
+import com.example.accalendar.utils.TargetDrawable;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -25,7 +28,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-import android.text.SpannableString;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -49,7 +51,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.prolificinteractive.materialcalendarview.spans.DotSpan;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -89,8 +92,9 @@ public class CalendarActivity extends AppCompatActivity
     private Map<String, Map<String, Map<String, Long>>> specialDays = new HashMap<>();
     private Map<String, Map<ArrayList<Long>, Integer>> tourneys = new HashMap<>();
     private CurrentDayDecorator currentDecorator;
-    private Map<String, Map<String, Long>> resources = new HashMap<>();
+    private Map<String, Map<String, Object>> resources = new HashMap<>();
     private Map<String, HashMap<String, Object>> birthdays = new HashMap<>();
+    private ArrayList<TargetDrawable> targets = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +116,7 @@ public class CalendarActivity extends AppCompatActivity
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
-        getVillagers(user.getUid());
+
         timeToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
@@ -133,8 +137,7 @@ public class CalendarActivity extends AppCompatActivity
             }
         });
 
-        getFirestore("users", user.getUid(), new String[]{"isTimeTravel", "dateOffset", "isNorthern"});
-        getFirestore("events", "yearly events", new String[0]);
+        getUserFields("users", user.getUid(), new String[]{"isTimeTravel", "dateOffset", "isNorthern"});
 
         travelDate.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
@@ -156,7 +159,7 @@ public class CalendarActivity extends AppCompatActivity
         mDateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                LocalDate date = LocalDate.of(year, month+1, dayOfMonth);
+                LocalDate date = LocalDate.of(year, month + 1, dayOfMonth);
                 dateOffset = ChronoUnit.DAYS.between(LocalDate.now(), date);
                 updateFirestore("users", user.getUid(), new HashMap<String, Object>() {{
                     put("dateOffset", dateOffset);
@@ -170,8 +173,8 @@ public class CalendarActivity extends AppCompatActivity
 
         GoogleSignInOptions gso =
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
+                        .requestEmail()
+                        .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
     }
@@ -182,10 +185,10 @@ public class CalendarActivity extends AppCompatActivity
             @NonNull CalendarDay date,
             boolean selected) {
         LocalDate day = date.getDate();
-        LayoutInflater layoutInflater = (LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
 
         ArrayList<View> eventViews = getCorrespondingEvents(day);
-        if(eventViews.size() > 0) {
+        if (eventViews.size() > 0) {
             View popView = layoutInflater.inflate(R.layout.calendar_popup, null);
             TextView title = popView.findViewById(R.id.cardtitle);
             Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin_sans_semibold.ttf");
@@ -210,81 +213,67 @@ public class CalendarActivity extends AppCompatActivity
 
     private ArrayList<View> getCorrespondingEvents(LocalDate date) {
         ArrayList<View> listViews = new ArrayList<>();
-        LayoutInflater layoutInflater = (LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
 
         ArrayList<String> eventList = new ArrayList<>();
         int color = ResourcesCompat.getColor(getResources(), R.color.event, null);
-        for (Map.Entry <String, Map<String, Long>> event : events.entrySet()) {
+        for (Map.Entry<String, Map<String, Long>> event : events.entrySet()) {
             if (EventDecorator.isEvent(event, date))
-                    eventList.add(event.getKey());
+                eventList.add(event.getKey());
         }
-        addViewToList(listViews, layoutInflater, color, eventList);
+        Drawable event = ResourcesCompat.getDrawable(getResources(),
+                R.drawable.eventicon, null);
+        InflateLayouts.fillEventListItem(listViews, layoutInflater, color, eventList, typeface, event);
 
         ArrayList<String> resourceList = new ArrayList<>();
         color = ResourcesCompat.getColor(getResources(), R.color.resources, null);
-        for (Map.Entry <String, Map<String, Long>> resource : resources.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> resource : resources.entrySet()) {
             if (ResourceDecorator.isResourceEvent(resource, date)) {
                 String resourceName = resource.getKey();
-                boolean addS = resourceName.charAt(resourceName.length()-1) != 's';
+                boolean addS = resourceName.charAt(resourceName.length() - 1) != 's';
                 resourceList.add(resourceName + " Begin" + (addS ? "s" : ""));
             }
         }
-        addViewToList(listViews, layoutInflater, color, resourceList);
+        Drawable resource = ResourcesCompat.getDrawable(getResources(),
+                R.drawable.resourceicon, null);
+        InflateLayouts.fillEventListItem(listViews, layoutInflater, color, resourceList, typeface, resource);
 
         ArrayList<String> specialList = new ArrayList<>();
         color = ResourcesCompat.getColor(getResources(), R.color.special, null);
-        for (Map.Entry <String, Map<String, Map<String, Long>>> special : specialDays.entrySet()) {
+        for (Map.Entry<String, Map<String, Map<String, Long>>> special : specialDays.entrySet()) {
             Map<String, Map<String, Long>> specialCategories = special.getValue();
-            for (Map.Entry <String, Map<String, Long>> category : specialCategories.entrySet()) {
+            for (Map.Entry<String, Map<String, Long>> category : specialCategories.entrySet()) {
                 if (SpecialDecorator.isSpecialEvent(category, special.getKey(), date))
                     specialList.add(category.getKey());
             }
         }
-        addViewToList(listViews, layoutInflater, color, specialList);
+        Drawable special = ResourcesCompat.getDrawable(getResources(),
+                R.drawable.specialicon, null);
+        InflateLayouts.fillEventListItem(listViews, layoutInflater, color, specialList, typeface, special);
 
         ArrayList<String> tourneyList = new ArrayList<>();
         color = ResourcesCompat.getColor(getResources(), R.color.tourney, null);
-        for (Map.Entry <String, Map<ArrayList<Long>, Integer>> tourney : tourneys.entrySet()) {
+        for (Map.Entry<String, Map<ArrayList<Long>, Integer>> tourney : tourneys.entrySet()) {
             if (TourneyDecorator.isTourney(tourney, date))
                 tourneyList.add(tourney.getKey());
         }
-        addViewToList(listViews, layoutInflater, color, tourneyList);
+        Drawable tourney = ResourcesCompat.getDrawable(getResources(),
+                R.drawable.tourneyicon, null);
+        InflateLayouts.fillEventListItem(listViews, layoutInflater, color, tourneyList, typeface, tourney);
 
         ArrayList<String> birthdayList = new ArrayList<>();
         color = ResourcesCompat.getColor(getResources(), R.color.birthday, null);
-        for (Map.Entry <String, HashMap<String, Object>> villager : birthdays.entrySet()) {
+        for (Map.Entry<String, HashMap<String, Object>> villager : birthdays.entrySet()) {
             HashMap<String, Object> birthday = villager.getValue();
             if (date.getDayOfMonth() == (Integer) birthday.get("day") &&
                     date.getMonth().getValue() == (Integer) birthday.get("month"))
-                birthdayList.add(villager.getKey()+"'s Birthday");
+                birthdayList.add(villager.getKey() + "'s Birthday");
         }
-        addViewToList(listViews, layoutInflater, color, birthdayList);
+        Drawable birthday = ResourcesCompat.getDrawable(getResources(),
+                R.drawable.birthdayicon, null);
+        InflateLayouts.fillEventListItem(listViews, layoutInflater, color, birthdayList, typeface, birthday);
         return listViews;
-    }
-
-    private void addViewToList(ArrayList<View> listViews, LayoutInflater layoutInflater, int color,
-                               ArrayList<String> eventList) {
-        if (eventList.size() > 0) {
-            View eventListItem = layoutInflater.inflate(R.layout.event_list_item, null);
-            TextView eventSpan = eventListItem.findViewById(R.id.eventItemSpan);
-            LinearLayout eventListView = eventListItem.findViewById(R.id.eventItemList);
-            SpannableString eventString = new SpannableString(" ");
-            eventString.setSpan(new DotSpan(15, color), 0, eventString.length(), 0);
-            eventSpan.setText(eventString);
-            for (String eventName : eventList) {
-                TextView event = new TextView(eventListItem.getContext());
-                event.setText(eventName);
-                event.setTextColor(Color.DKGRAY);
-                event.setTextSize(16);
-                Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
-                event.setTypeface(typeface);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-                event.setLayoutParams(params);
-                eventListView.addView(event);
-            }
-            listViews.add(eventListItem);
-        }
     }
 
     private void updateCalendarDate(long offset) {
@@ -307,75 +296,54 @@ public class CalendarActivity extends AppCompatActivity
         LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
         LinearLayout list = findViewById(R.id.seasonalList);
         list.removeAllViews();
-        int color = Color.WHITE;
+        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
 
-        for (Map.Entry<String, Map<String, Long>> resource : resources.entrySet()) {
-            Map<String, Long> resourceInfo = resource.getValue();
+        for (Map.Entry<String, Map<String, Object>> resource : resources.entrySet()) {
+            Map<String, Object> resourceInfo = resource.getValue();
             LocalDate start = LocalDate.of(date.getYear(),
-                    resourceInfo.get("start month").intValue(),
-                    resourceInfo.get("start day").intValue());
+                    ((Long) resourceInfo.get("start month")).intValue(),
+                    ((Long) resourceInfo.get("start day")).intValue());
             LocalDate end = LocalDate.of(date.getYear(),
-                    resourceInfo.get("end month").intValue(),
-                    resourceInfo.get("end day").intValue());
+                    ((Long)resourceInfo.get("end month")).intValue(),
+                    ((Long)resourceInfo.get("end day")).intValue());
 
             if (date.isEqual(start) || date.isEqual(end) ||
                     (date.isAfter(start) && date.isBefore(end))) {
-                View resourceListItem = layoutInflater.inflate(R.layout.resource_list_item, null);
-                TextView resourceSpan = resourceListItem.findViewById(R.id.resourceItemSpan);
-                TextView resourceText = resourceListItem.findViewById(R.id.resourceItemText);
-                SpannableString resourceString = new SpannableString(" ");
-                resourceString.setSpan(new CenteredDotSpan(10, color), 0, resourceString.length(), 0);
-                resourceText.setTextSize(16);
-                Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin-sans.ttf");
-                resourceText.setTypeface(typeface);
-                resourceSpan.setText(resourceString);
-                resourceText.setText(resource.getKey() + " ending on: " +
-                        end.getMonthValue() + "/" + end.getDayOfMonth());
-                list.addView(resourceListItem);
+                try {
+                    TargetDrawable target = InflateLayouts.fillResourceListItem(layoutInflater, typeface,
+                            resource.getKey(), end, (String) resourceInfo.get("icon"),
+                            getApplicationContext(), list);
+                    targets.add(target);
+                } catch (Exception e) {
+                    Log.d(TAG, "Error "+e.toString());
+                }
             }
         }
     }
 
     private void updateFieldVars(DocumentSnapshot doc, String[] fields) {
-            switch (doc.getId()) {
-                case "yearly events":
-                    Map<String, Object> map = doc.getData();
-                    
-                    if (map != null) {
-                        for (Map.Entry<String, Object> entry : map.entrySet()) {
-                            Map<String, Long> dateInfo = (Map<String, Long>) entry.getValue();
-                            events.put(entry.getKey(), dateInfo);
-                        }
-
-                        MaterialCalendarView calendar = findViewById(R.id.calendarView);
-                        calendar.addDecorator(new EventDecorator(
-                                ResourcesCompat.getColor(getResources(), R.color.event, null),
-                                events));
-                    }
+        for (String field : fields) {
+            switch (field) {
+                case "isTimeTravel":
+                    Switch timeToggle = findViewById(R.id.timeToggle);
+                    isChecked = (boolean) doc.get(field);
+                    timeToggle.setChecked(isChecked);
                     break;
+                case "dateOffset":
+                    dateOffset = (long) doc.get(field);
+                    updateCalendarDate(dateOffset);
+                    break;
+                case "isNorthern":
+                    isNorthern = (boolean) doc.get(field);
+                    getTourneys();
+                    getSeasonalResources();
+                    getSpecialDays();
+                    getVillagers(user.getUid());
+                    getYearlyEvents();
                 default:
-                    for (String field : fields) {
-                        switch (field) {
-                            case "isTimeTravel":
-                                Switch timeToggle = findViewById(R.id.timeToggle);
-                                isChecked = (boolean) doc.get(field);
-                                timeToggle.setChecked(isChecked);
-                                break;
-                            case "dateOffset":
-                                dateOffset = (long) doc.get(field);
-                                updateCalendarDate(dateOffset);
-                                break;
-                            case "isNorthern":
-                                isNorthern = (boolean) doc.get(field);
-                                getTourneys();
-                                getSeasonalResources();
-                                getSpecialDays();
-                            default:
-                                break;
-                        }
-                    }
                     break;
             }
+        }
 
     }
 
@@ -396,7 +364,7 @@ public class CalendarActivity extends AppCompatActivity
                 });
     }
 
-    private void getFirestore(String collection, String docId, final String[] fields) {
+    private void getUserFields(String collection, String docId, final String[] fields) {
         DocumentReference docRef = db.collection(collection).document(docId);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -417,52 +385,54 @@ public class CalendarActivity extends AppCompatActivity
 
     }
 
-    private void getBirthdays(DocumentSnapshot doc) {
-        Map<String, Object> map = doc.getData();
-        if (map != null) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                Map<String, Object> eventSet = (Map<String, Object>) entry.getValue();
-                final int month = ((Long) eventSet.get("month")).intValue();;
-                final int day = ((Long) eventSet.get("day")).intValue();
-
-                birthdays.put(entry.getKey(), new HashMap<String, Object>() {{
-                    put("day", day);
-                    put("month", month);
-                }});
-            }
-            MaterialCalendarView calendar = findViewById(R.id.calendarView);
-            calendar.addDecorator(new BirthdayDecorator(
-                    ResourcesCompat.getColor(getResources(), R.color.birthday, null),
-                    birthdays));
-        }
-    }
-
-    private void getSpecialDayInfo(DocumentSnapshot doc) {
-        Map<String, Object>  map = doc.getData();
-        if (map != null) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                Map<String, Map<String, Long>> specialDay =
-                        (Map<String, Map<String, Long>>) entry.getValue();
-                specialDays.put(entry.getKey(), specialDay);
-            }
-
-            MaterialCalendarView calendar = findViewById(R.id.calendarView);
-            calendar.addDecorator(new SpecialDecorator(
-                    ResourcesCompat.getColor(getResources(), R.color.special, null),
-                    specialDays));
-        }
-    }
-
-    private void getSpecialDays() {
-        DocumentReference docRef = db.collection("events").document("special days");
+    private void getVillagers(final String uid) {
+        final DocumentReference docRef = db.collection("users").document(uid)
+                .collection("villagers").document("island");
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        getSpecialDayInfo(document);
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Map<String, Object> map = doc.getData();
+                        Log.d(TAG, "DocumentSnapshot data: " + map);
+                        if (map != null) {
+                            birthdays = DocSnapToData.mapBirthdays(map);
+                            Drawable d = ResourcesCompat.getDrawable(getResources(),
+                                    R.drawable.birthdayicon, null);
+                            MaterialCalendarView calendar = findViewById(R.id.calendarView);
+                            calendar.addDecorator(new BirthdayDecorator(birthdays, d));
+                        }
+                    } else {
+                        Log.d(TAG, "No such document");
+                        docRef.set(new HashMap<>());
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void getYearlyEvents() {
+        DocumentReference docRef = db.collection("events").document("yearly events");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
+                        Map<String, Object> map = doc.getData();
+
+                        if (map != null) {
+                            events = DocSnapToData.mapEvents(map);
+
+                            MaterialCalendarView calendar = findViewById(R.id.calendarView);
+                            calendar.addDecorator(new EventDecorator(
+                                    ResourcesCompat.getColor(getResources(), R.color.event, null),
+                                    events));
+                        }
                     } else {
                         Log.d(TAG, "No such document");
                     }
@@ -473,22 +443,32 @@ public class CalendarActivity extends AppCompatActivity
         });
     }
 
-    private void getTourneyInfo(DocumentSnapshot doc) {
-        Map<String, Object>  map = doc.getData();
-        if (map != null) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                Map<ArrayList<Long>, Integer> tourney = new HashMap<>();
-                ArrayList<Long> months = (ArrayList<Long>) ((Map)entry.getValue()).get("months");
-                tourney.put(months, ((Long)((Map)entry.getValue()).get("saturday")).intValue());
-                tourneys.put(entry.getKey(), tourney);
+    private void getSpecialDays() {
+        DocumentReference docRef = db.collection("events").document("special days");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Map<String, Object> map = doc.getData();
+                        Log.d(TAG, "DocumentSnapshot data: " + map);
+                        if (map != null) {
+                            specialDays = DocSnapToData.mapSpecialDays(map);
+
+                            MaterialCalendarView calendar = findViewById(R.id.calendarView);
+                            Drawable d = ResourcesCompat.getDrawable(getResources(),
+                                    R.drawable.specialicon, null);
+                            calendar.addDecorator(new SpecialDecorator(specialDays, d));
+                        }
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
             }
-
-            MaterialCalendarView calendar = findViewById(R.id.calendarView);
-            calendar.addDecorator(new TourneyDecorator(
-                    ResourcesCompat.getColor(getResources(), R.color.tourney, null),
-                    tourneys));
-        }
-
+        });
     }
 
     private void getTourneys() {
@@ -501,10 +481,18 @@ public class CalendarActivity extends AppCompatActivity
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        getTourneyInfo(document);
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Map<String, Object> map = doc.getData();
+                        Log.d(TAG, "DocumentSnapshot data: " + map);
+                        if (map != null) {
+                            tourneys = DocSnapToData.mapTourneys(map);
+
+                            MaterialCalendarView calendar = findViewById(R.id.calendarView);
+                            Drawable d = ResourcesCompat.getDrawable(getResources(),
+                                    R.drawable.tourneyicon, null);
+                            calendar.addDecorator(new TourneyDecorator(tourneys, d));
+                        }
                     } else {
                         Log.d(TAG, "No such document");
                     }
@@ -513,21 +501,6 @@ public class CalendarActivity extends AppCompatActivity
                 }
             }
         });
-    }
-
-    private void getResourceInfo(DocumentSnapshot doc) {
-        Map<String, Object>  map = doc.getData();
-        if (map != null) {
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                Map<String, Long> dateInfo = (Map<String, Long>) entry.getValue();
-                resources.put(entry.getKey(), dateInfo);
-            }
-            MaterialCalendarView calendar = findViewById(R.id.calendarView);
-            calendar.addDecorator(new ResourceDecorator(
-                    ResourcesCompat.getColor(getResources(), R.color.resources, null),
-                    resources));
-            updateCalendarDate(dateOffset);
-        }
     }
 
     private void getSeasonalResources() {
@@ -540,34 +513,20 @@ public class CalendarActivity extends AppCompatActivity
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        getResourceInfo(document);
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Map<String, Object> map = doc.getData();
+                        Log.d(TAG, "DocumentSnapshot data: " + map);
+                        if (map != null) {
+                            resources = DocSnapToData.mapResources(map);
+                            MaterialCalendarView calendar = findViewById(R.id.calendarView);
+                            Drawable d = ResourcesCompat.getDrawable(getResources(),
+                                    R.drawable.resourceicon, null);
+                            calendar.addDecorator(new ResourceDecorator(resources, d));
+                            updateCalendarDate(dateOffset);
+                        }
                     } else {
                         Log.d(TAG, "No such document");
-                    }
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                }
-            }
-        });
-    }
-
-    private void getVillagers(final String uid) {
-        final DocumentReference docRef = db.collection("users").document(uid)
-                .collection("villagers").document("island");
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        getBirthdays(document);
-                    } else {
-                        Log.d(TAG, "No such document");
-                        docRef.set(new HashMap<>());
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -613,7 +572,7 @@ public class CalendarActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_fish) {
 
-        }else if (id == R.id.nav_fossil) {
+        } else if (id == R.id.nav_fossil) {
 
         } else if (id == R.id.nav_signout) {
             signOut();
@@ -639,5 +598,4 @@ public class CalendarActivity extends AppCompatActivity
                     }
                 });
     }
-
 }

@@ -1,5 +1,7 @@
 package com.example.accalendar.decorators;
 
+import android.graphics.drawable.Drawable;
+
 import com.example.accalendar.decorators.DotSpanPadded;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
@@ -11,11 +13,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SpecialDecorator implements DayViewDecorator {
-    private final int color;
     private final  Map<String, Map<String, Map<String, Long>>> specialDays;
+    private final Drawable d;
 
-    public SpecialDecorator(int color,  Map<String, Map<String, Map<String, Long>>> specialDays) {
-        this.color = color;
+    public SpecialDecorator(Map<String, Map<String, Map<String, Long>>> specialDays, Drawable d) {
+        this.d = d;
         this.specialDays = new HashMap<>(specialDays);
     }
 
@@ -52,6 +54,7 @@ public class SpecialDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.addSpan(new DotSpanPadded(7, color, 3));
+        DecoratorImageSpan span = new DecoratorImageSpan(d, 3);
+        view.addSpan(span);
     }
 }

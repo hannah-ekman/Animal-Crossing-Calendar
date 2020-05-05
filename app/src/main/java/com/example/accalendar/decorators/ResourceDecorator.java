@@ -1,5 +1,7 @@
 package com.example.accalendar.decorators;
 
+import android.graphics.drawable.Drawable;
+
 import com.example.accalendar.decorators.DotSpanPadded;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.DayViewDecorator;
@@ -11,18 +13,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ResourceDecorator implements DayViewDecorator {
-    private final int color;
-    private final Map<String, Map<String, Long>> resources;
+    private final Map<String, Map<String, Object>> resources;
+    private final Drawable d;
 
-    public ResourceDecorator(int color, Map<String, Map<String, Long>> resources) {
-        this.color = color;
+    public ResourceDecorator(Map<String, Map<String, Object>> resources, Drawable d) {
         this.resources = new HashMap<>(resources);
+        this.d = d;
     }
 
     @Override
     public boolean shouldDecorate(final CalendarDay day) {
         LocalDate date = day.getDate();
-        for (Map.Entry <String, Map<String, Long>> resource : resources.entrySet()) {
+        for (Map.Entry <String, Map<String, Object>> resource : resources.entrySet()) {
             if (isResourceEvent(resource, date)) {
                 return true;
             }
@@ -30,10 +32,10 @@ public class ResourceDecorator implements DayViewDecorator {
         return false;
     }
 
-    public static boolean isResourceEvent(Map.Entry <String, Map<String, Long>> resource, LocalDate day) {
-        Map<String, Long> resourceInfo = resource.getValue();
-        if (day.getMonth().getValue() == resourceInfo.get("start month")
-                && day.getDayOfMonth() == resourceInfo.get("start day")) {
+    public static boolean isResourceEvent(Map.Entry <String, Map<String, Object>> resource, LocalDate day) {
+        Map<String, Object> resourceInfo = resource.getValue();
+        if (day.getMonth().getValue() == (Long) resourceInfo.get("start month")
+                && day.getDayOfMonth() == (Long) resourceInfo.get("start day")) {
             return true;
         }
         return false;
@@ -41,6 +43,7 @@ public class ResourceDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.addSpan(new DotSpanPadded(7, color, 4));
+        DecoratorImageSpan span = new DecoratorImageSpan(d, 4);
+        view.addSpan(span);
     }
 }

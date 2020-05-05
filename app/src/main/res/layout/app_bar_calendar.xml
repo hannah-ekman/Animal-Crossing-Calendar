@@ -78,7 +78,7 @@
         android:paddingLeft="15dp"
         android:paddingBottom="8dp"
         android:paddingTop="8dp"
-        android:text=" Current Seasonal Resources"
+        android:text=" Current Seasonal Materials"
         android:textColor="@android:color/white"
         android:textSize="18dp"
         android:textStyle="bold"
