@@ -48,7 +48,7 @@ public class InflateLayouts {
             TextView eventSpan = eventListItem.findViewById(R.id.eventItemSpan);
             LinearLayout eventListView = eventListItem.findViewById(R.id.eventItemList);
             SpannableString eventString = new SpannableString(" ");
-            d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
+            d.setBounds(0, 0, 50, 50);
             CenteredImageSpan span = new CenteredImageSpan(d);
             eventString.setSpan(span, 0, eventString.length(),
                     SpannableString.SPAN_INCLUSIVE_EXCLUSIVE);
