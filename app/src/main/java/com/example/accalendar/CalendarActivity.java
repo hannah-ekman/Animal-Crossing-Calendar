@@ -236,7 +236,7 @@ public class CalendarActivity extends AppCompatActivity
             }
         }
         Drawable resource = ResourcesCompat.getDrawable(getResources(),
-                R.drawable.resourceicon, null);
+                R.drawable.cherryblossomicon, null);
         InflateLayouts.fillEventListItem(listViews, layoutInflater, color, resourceList, typeface, resource);
 
         ArrayList<String> specialList = new ArrayList<>();
@@ -259,7 +259,7 @@ public class CalendarActivity extends AppCompatActivity
                 tourneyList.add(tourney.getKey());
         }
         Drawable tourney = ResourcesCompat.getDrawable(getResources(),
-                R.drawable.tourneyicon, null);
+                R.drawable.fishicon, null);
         InflateLayouts.fillEventListItem(listViews, layoutInflater, color, tourneyList, typeface, tourney);
 
         ArrayList<String> birthdayList = new ArrayList<>();
@@ -271,7 +271,7 @@ public class CalendarActivity extends AppCompatActivity
                 birthdayList.add(villager.getKey() + "'s Birthday");
         }
         Drawable birthday = ResourcesCompat.getDrawable(getResources(),
-                R.drawable.birthdayicon, null);
+                R.drawable.gifticon, null);
         InflateLayouts.fillEventListItem(listViews, layoutInflater, color, birthdayList, typeface, birthday);
         return listViews;
     }
@@ -399,7 +399,7 @@ public class CalendarActivity extends AppCompatActivity
                         if (map != null) {
                             birthdays = DocSnapToData.mapBirthdays(map);
                             Drawable d = ResourcesCompat.getDrawable(getResources(),
-                                    R.drawable.birthdayicon, null);
+                                    R.drawable.gifticon, null);
                             MaterialCalendarView calendar = findViewById(R.id.calendarView);
                             calendar.addDecorator(new BirthdayDecorator(birthdays, d));
                         }
@@ -490,7 +490,7 @@ public class CalendarActivity extends AppCompatActivity
 
                             MaterialCalendarView calendar = findViewById(R.id.calendarView);
                             Drawable d = ResourcesCompat.getDrawable(getResources(),
-                                    R.drawable.tourneyicon, null);
+                                    R.drawable.fishicon, null);
                             calendar.addDecorator(new TourneyDecorator(tourneys, d));
                         }
                     } else {
@@ -521,7 +521,7 @@ public class CalendarActivity extends AppCompatActivity
                             resources = DocSnapToData.mapResources(map);
                             MaterialCalendarView calendar = findViewById(R.id.calendarView);
                             Drawable d = ResourcesCompat.getDrawable(getResources(),
-                                    R.drawable.resourceicon, null);
+                                    R.drawable.cherryblossomicon, null);
                             calendar.addDecorator(new ResourceDecorator(resources, d));
                             updateCalendarDate(dateOffset);
                         }

@@ -25,7 +25,7 @@ public class DecoratorImageSpan implements LineBackgroundSpan {
     ) {
         int y;
         int x;
-        drawable.setBounds(0, 0, 30, 30);
+        drawable.setBounds(0, 0, 32, 32);
         if (location == 1 || location == 2)
             y = top-drawable.getBounds().bottom-padding;
         else
