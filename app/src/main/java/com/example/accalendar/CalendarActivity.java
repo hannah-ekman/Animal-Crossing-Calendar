@@ -257,7 +257,8 @@ public class CalendarActivity extends AppCompatActivity
         } else if (id == R.id.nav_bug) {
 
         } else if (id == R.id.nav_fish) {
-
+            Intent intent = new Intent(this, Fish.class);
+            startActivity(intent);
         }else if (id == R.id.nav_fossil) {
 
         } else if (id == R.id.nav_signout) {
