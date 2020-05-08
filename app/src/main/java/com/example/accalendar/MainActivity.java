@@ -191,13 +191,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d(TAG, "Creating user");
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("email", user.getEmail());
-                        userData.put("villagers", new HashMap<>());
-                        userData.put("bugs", new HashMap<>());
-                        userData.put("fish", new HashMap<>());
-                        userData.put("fossils", new HashMap<>());
-                        userData.put("furniture", new HashMap<>());
-                        userData.put("recipes", new HashMap<>());
-                        userData.put("gallery", new HashMap<>());
                         userData.put("isTimeTravel", false);
                         userData.put("dateOffset", 0);
 
