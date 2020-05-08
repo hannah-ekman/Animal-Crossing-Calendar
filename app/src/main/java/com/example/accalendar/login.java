@@ -77,7 +77,7 @@ public class login extends AppCompatActivity {
     private void updateUI(FirebaseUser user) {
         if (user != null) {
 
-            Intent homepage_redirect = new Intent(login.this, MainPage.class);
+            Intent homepage_redirect = new Intent(login.this, CalendarActivity.class);
             startActivity(homepage_redirect);
         } else {
 

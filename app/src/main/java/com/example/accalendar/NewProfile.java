@@ -40,11 +40,17 @@ public class NewProfile extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_newprofile);
         mAuth = FirebaseAuth.getInstance();
+        userid = mAuth.getCurrentUser().getUid();
 
         username = findViewById(R.id.edit_name);
         island_name = findViewById(R.id.edit_island);
         hemisphere_switch = findViewById(R.id.hemisphere_switch);
         next = (Button) findViewById(R.id.nextbutton);
+        next.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                next(v);
+            }
+        });
         //need to findviewbyid for layout if we want to add error checking
         new_profile();
     }
@@ -65,23 +71,17 @@ public class NewProfile extends AppCompatActivity {
     public void next(View view){
         String user_name = username.getText().toString();
         String islandName = island_name.getText().toString();
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userID = user.getUid();
-        Intent intent = getIntent();
 
         db = FirebaseFirestore.getInstance();
 
-        List<String> UserList = new ArrayList<>();
-
         Map<String, Object> userData = new HashMap<>();
-        userData.put("Username", user_name);
-        userData.put("Island Name", islandName);
-        userData.put("Hemisphere", isNorth);
+        userData.put("username", user_name);
+        userData.put("island name", islandName);
+        userData.put("isNorthern", isNorth);
 
         // Add a new document into the events collection
-        userid = db.collection("users").document().getId();
         db.collection("users").document(userid)
-                .set(userData)
+                .update(userData)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -94,7 +94,7 @@ public class NewProfile extends AppCompatActivity {
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
-        Intent mainpage_redirect = new Intent(NewProfile.this, MainPage.class);
+        Intent mainpage_redirect = new Intent(NewProfile.this, CalendarActivity.class);
         startActivity(mainpage_redirect);
     }
 

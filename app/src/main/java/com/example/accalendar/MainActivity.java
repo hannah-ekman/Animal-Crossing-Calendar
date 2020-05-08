@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(this, CalendarActivity.class);
             startActivity(intent);
         } else {
-            //idk
+            // Prob display error
         }
     }
 
@@ -165,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             addUserToFirebase(user);
-                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -187,8 +186,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        Intent mainpage_intent = new Intent(MainActivity.this, NewProfile.class);
-                        startActivity(mainpage_intent);
+                        updateUI(user); // User already exists -> skip new profile
                     } else {
                         Log.d(TAG, "Creating user");
                         Map<String, Object> userData = new HashMap<>();
@@ -204,6 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         userData.put("dateOffset", 0);
 
                         sendToFirebase(userData, user.getUid());
+                        // New user so send to new profile
                         Intent newprofile_intent = new Intent(MainActivity.this, NewProfile.class);
                         startActivity(newprofile_intent);
                     }
