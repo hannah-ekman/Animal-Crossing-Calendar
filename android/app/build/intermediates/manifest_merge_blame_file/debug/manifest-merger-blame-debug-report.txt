@@ -1,0 +1,309 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.hekman.accalendar"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="19"
+8-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml
+9        android:targetSdkVersion="29" />
+9-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:5:5-66
+11-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:5:22-64
+12
+13    <!-- Although the *SdkVersion is captured in gradle build files, this is required for non gradle builds -->
+14    <!-- <uses-sdk android:minSdkVersion="14" /> -->
+15    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+15-->[com.google.firebase:firebase-firestore:21.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6890f1dbb96ad2e2f0a49cc1611ab9b6/jetified-firebase-firestore-21.3.0/AndroidManifest.xml:13:5-79
+15-->[com.google.firebase:firebase-firestore:21.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6890f1dbb96ad2e2f0a49cc1611ab9b6/jetified-firebase-firestore-21.3.0/AndroidManifest.xml:13:22-76
+16    <uses-permission android:name="android.permission.WAKE_LOCK" />
+16-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:25:5-68
+16-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:25:22-65
+17    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE" /> <!-- Required by older versions of Google Play services to create IID tokens -->
+17-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:26:5-110
+17-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:26:22-107
+18    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+18-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:26:5-82
+18-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:26:22-79
+19
+20    <application
+20-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:7:5-42:19
+21        android:name="androidx.multidex.MultiDexApplication"
+21-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:8:9-61
+22        android:allowBackup="true"
+22-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:9:9-35
+23        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+23-->[androidx.core:core:1.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/130f40789f3addc98db185e1dbe16726/core-1.1.0/AndroidManifest.xml:24:18-86
+24        android:debuggable="true"
+25        android:icon="@mipmap/ic_launcher"
+25-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:10:9-43
+26        android:label="@string/app_name"
+26-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:11:9-41
+27        android:roundIcon="@mipmap/ic_launcher_round"
+27-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:12:9-54
+28        android:supportsRtl="true"
+28-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:13:9-35
+29        android:testOnly="true"
+30        android:theme="@style/AppTheme" >
+30-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:14:9-40
+31        <activity
+31-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:15:9-18:58
+32            android:name="com.example.accalendar.CalendarActivity"
+32-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:16:13-45
+33            android:label="@string/title_activity_calendar"
+33-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:17:13-60
+34            android:theme="@style/AppTheme.NoActionBar" />
+34-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:18:13-56
+35        <activity
+35-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:19:9-26:20
+36            android:name="com.example.accalendar.MainActivity"
+36-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:20:13-41
+37            android:label="@string/app_name" >
+37-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:21:13-45
+38            <intent-filter>
+38-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:22:13-25:29
+39                <action android:name="android.intent.action.MAIN" />
+39-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:23:17-69
+39-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:23:25-66
+40
+41                <category android:name="android.intent.category.LAUNCHER" />
+41-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:24:17-77
+41-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:24:27-74
+42            </intent-filter>
+43        </activity>
+44        <activity
+44-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:27:9-29:39
+45            android:name="com.example.accalendar.signup"
+45-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:27:19-41
+46            android:label="Sign Up"
+46-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:28:13-36
+47            android:noHistory="true" />
+47-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:29:13-37
+48        <activity
+48-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:30:9-32:39
+49            android:name="com.example.accalendar.login"
+49-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:30:19-40
+50            android:label="Log In"
+50-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:31:13-35
+51            android:noHistory="true" />
+51-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:32:13-37
+52        <activity
+52-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:33:9-35:39
+53            android:name="com.example.accalendar.Fish"
+53-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:33:19-39
+54            android:label="Fish Tracker"
+54-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:34:13-41
+55            android:noHistory="true" />
+55-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:35:13-37
+56        <activity
+56-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:36:9-38:39
+57            android:name="com.example.accalendar.NewProfile"
+57-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:36:19-45
+58            android:label="New Profile"
+58-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:37:13-40
+59            android:noHistory="true" />
+59-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:38:13-37
+60
+61        <meta-data
+61-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:39:9-41:57
+62            android:name="preloaded_fonts"
+62-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:40:13-43
+63            android:resource="@array/preloaded_fonts" />
+63-->/Users/hannah/Animal-Crossing-Calendar/app/src/main/AndroidManifest.xml:41:13-54
+64
+65        <activity
+65-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:24:9-31:50
+66            android:name="com.google.firebase.auth.internal.FederatedSignInActivity"
+66-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:25:13-85
+67            android:excludeFromRecents="true"
+67-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:26:13-46
+68            android:exported="true"
+68-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:27:13-36
+69            android:launchMode="singleTask"
+69-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:28:13-44
+70            android:permission="com.google.firebase.auth.api.gms.permission.LAUNCH_FEDERATED_SIGN_IN"
+70-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:29:13-102
+71            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+71-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:30:13-72
+72
+73        <service
+73-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:33:9-39:19
+74            android:name="com.google.firebase.components.ComponentDiscoveryService"
+74-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:34:13-84
+75            android:directBootAware="true"
+75-->[com.google.firebase:firebase-common:19.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/c972b5801661d054e8b332d4d4133f84/jetified-firebase-common-19.3.0/AndroidManifest.xml:34:13-43
+76            android:exported="false" >
+76-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:35:13-37
+77            <meta-data
+77-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:36:13-38:85
+78                android:name="com.google.firebase.components:com.google.firebase.auth.FirebaseAuthRegistrar"
+78-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:37:17-109
+79                android:value="com.google.firebase.components.ComponentRegistrar" />
+79-->[com.google.firebase:firebase-auth:19.2.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ab1ccb83ecef153dda955d05e19c29ef/jetified-firebase-auth-19.2.0/AndroidManifest.xml:38:17-82
+80            <meta-data
+80-->[com.google.firebase:firebase-firestore:21.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6890f1dbb96ad2e2f0a49cc1611ab9b6/jetified-firebase-firestore-21.3.0/AndroidManifest.xml:20:13-22:85
+81                android:name="com.google.firebase.components:com.google.firebase.firestore.FirestoreRegistrar"
+81-->[com.google.firebase:firebase-firestore:21.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6890f1dbb96ad2e2f0a49cc1611ab9b6/jetified-firebase-firestore-21.3.0/AndroidManifest.xml:21:17-111
+82                android:value="com.google.firebase.components.ComponentRegistrar" />
+82-->[com.google.firebase:firebase-firestore:21.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6890f1dbb96ad2e2f0a49cc1611ab9b6/jetified-firebase-firestore-21.3.0/AndroidManifest.xml:22:17-82
+83            <meta-data
+83-->[com.google.android.gms:play-services-measurement-api:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/0b0e755419fdb73429b0e6f45552736a/jetified-play-services-measurement-api-17.2.1/AndroidManifest.xml:30:13-32:85
+84                android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar"
+84-->[com.google.android.gms:play-services-measurement-api:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/0b0e755419fdb73429b0e6f45552736a/jetified-play-services-measurement-api-17.2.1/AndroidManifest.xml:31:17-139
+85                android:value="com.google.firebase.components.ComponentRegistrar" />
+85-->[com.google.android.gms:play-services-measurement-api:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/0b0e755419fdb73429b0e6f45552736a/jetified-play-services-measurement-api-17.2.1/AndroidManifest.xml:32:17-82
+86            <meta-data
+86-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:32:13-34:85
+87                android:name="com.google.firebase.components:com.google.firebase.iid.Registrar"
+87-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:33:17-96
+88                android:value="com.google.firebase.components.ComponentRegistrar" />
+88-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:34:17-82
+89        </service>
+90
+91        <activity
+91-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:23:9-27:75
+92            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+92-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:24:13-93
+93            android:excludeFromRecents="true"
+93-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:25:13-46
+94            android:exported="false"
+94-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:26:13-37
+95            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+95-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:27:13-72
+96        <!--
+97            Service handling Google Sign-In user revocation. For apps that do not integrate with
+98            Google Sign-In, this service will never be started.
+99        -->
+100        <service
+100-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:33:9-36:110
+101            android:name="com.google.android.gms.auth.api.signin.RevocationBoundService"
+101-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:34:13-89
+102            android:exported="true"
+102-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:35:13-36
+103            android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION" />
+103-->[com.google.android.gms:play-services-auth:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/af105e8f3d02a3f4d582cfc797261187/jetified-play-services-auth-17.0.0/AndroidManifest.xml:36:13-107
+104
+105        <provider
+105-->[com.github.prolificinteractive:material-calendarview:2.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/437d60c02ce39f4c07f5d594ea4b03c9/jetified-material-calendarview-2.0.0/AndroidManifest.xml:12:9-16:40
+106            android:name="com.prolificinteractive.materialcalendarview.MaterialCalendarViewInitProvider"
+106-->[com.github.prolificinteractive:material-calendarview:2.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/437d60c02ce39f4c07f5d594ea4b03c9/jetified-material-calendarview-2.0.0/AndroidManifest.xml:13:13-105
+107            android:authorities="com.hekman.accalendar.materialcalendarviewinitprovider"
+107-->[com.github.prolificinteractive:material-calendarview:2.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/437d60c02ce39f4c07f5d594ea4b03c9/jetified-material-calendarview-2.0.0/AndroidManifest.xml:14:13-84
+108            android:enabled="true"
+108-->[com.github.prolificinteractive:material-calendarview:2.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/437d60c02ce39f4c07f5d594ea4b03c9/jetified-material-calendarview-2.0.0/AndroidManifest.xml:15:13-35
+109            android:exported="false" />
+109-->[com.github.prolificinteractive:material-calendarview:2.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/437d60c02ce39f4c07f5d594ea4b03c9/jetified-material-calendarview-2.0.0/AndroidManifest.xml:16:13-37
+110        <provider
+110-->[com.squareup.picasso:picasso:2.71828] /Users/hannah/.gradle/caches/transforms-2/files-2.1/cd918f62722a215764c43ecf12c28043/jetified-picasso-2.71828/AndroidManifest.xml:8:9-11:40
+111            android:name="com.squareup.picasso.PicassoProvider"
+111-->[com.squareup.picasso:picasso:2.71828] /Users/hannah/.gradle/caches/transforms-2/files-2.1/cd918f62722a215764c43ecf12c28043/jetified-picasso-2.71828/AndroidManifest.xml:9:13-64
+112            android:authorities="com.hekman.accalendar.com.squareup.picasso"
+112-->[com.squareup.picasso:picasso:2.71828] /Users/hannah/.gradle/caches/transforms-2/files-2.1/cd918f62722a215764c43ecf12c28043/jetified-picasso-2.71828/AndroidManifest.xml:10:13-72
+113            android:exported="false" />
+113-->[com.squareup.picasso:picasso:2.71828] /Users/hannah/.gradle/caches/transforms-2/files-2.1/cd918f62722a215764c43ecf12c28043/jetified-picasso-2.71828/AndroidManifest.xml:11:13-37
+114
+115        <receiver
+115-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:29:9-33:20
+116            android:name="com.google.android.gms.measurement.AppMeasurementReceiver"
+116-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:30:13-85
+117            android:enabled="true"
+117-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:31:13-35
+118            android:exported="false" >
+118-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:32:13-37
+119        </receiver>
+120        <receiver
+120-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:34:9-42:20
+121            android:name="com.google.android.gms.measurement.AppMeasurementInstallReferrerReceiver"
+121-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:35:13-100
+122            android:enabled="true"
+122-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:36:13-35
+123            android:exported="true"
+123-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:37:13-36
+124            android:permission="android.permission.INSTALL_PACKAGES" >
+124-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:38:13-69
+125            <intent-filter>
+125-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:39:13-41:29
+126                <action android:name="com.android.vending.INSTALL_REFERRER" />
+126-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:40:17-79
+126-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:40:25-76
+127            </intent-filter>
+128        </receiver>
+129
+130        <service
+130-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:44:9-47:40
+131            android:name="com.google.android.gms.measurement.AppMeasurementService"
+131-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:45:13-84
+132            android:enabled="true"
+132-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:46:13-35
+133            android:exported="false" />
+133-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:47:13-37
+134        <service
+134-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:48:9-52:72
+135            android:name="com.google.android.gms.measurement.AppMeasurementJobService"
+135-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:49:13-87
+136            android:enabled="true"
+136-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:50:13-35
+137            android:exported="false"
+137-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:51:13-37
+138            android:permission="android.permission.BIND_JOB_SERVICE" />
+138-->[com.google.android.gms:play-services-measurement:17.2.1] /Users/hannah/.gradle/caches/transforms-2/files-2.1/b55e299a31b8dace0ad39c95bdc72b08/jetified-play-services-measurement-17.2.1/AndroidManifest.xml:52:13-69
+139
+140        <receiver
+140-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:37:9-44:20
+141            android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver"
+141-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:38:13-78
+142            android:exported="true"
+142-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:39:13-36
+143            android:permission="com.google.android.c2dm.permission.SEND" >
+143-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:40:13-73
+144            <intent-filter>
+144-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:41:13-43:29
+145                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+145-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:42:17-81
+145-->[com.google.firebase:firebase-iid:19.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/6b50c5c127f0729fadb9856f165bc584/jetified-firebase-iid-19.0.0/AndroidManifest.xml:42:25-78
+146            </intent-filter>
+147        </receiver>
+148
+149        <provider
+149-->[com.google.firebase:firebase-common:19.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/c972b5801661d054e8b332d4d4133f84/jetified-firebase-common-19.3.0/AndroidManifest.xml:26:9-30:39
+150            android:name="com.google.firebase.provider.FirebaseInitProvider"
+150-->[com.google.firebase:firebase-common:19.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/c972b5801661d054e8b332d4d4133f84/jetified-firebase-common-19.3.0/AndroidManifest.xml:27:13-77
+151            android:authorities="com.hekman.accalendar.firebaseinitprovider"
+151-->[com.google.firebase:firebase-common:19.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/c972b5801661d054e8b332d4d4133f84/jetified-firebase-common-19.3.0/AndroidManifest.xml:28:13-72
+152            android:exported="false"
+152-->[com.google.firebase:firebase-common:19.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/c972b5801661d054e8b332d4d4133f84/jetified-firebase-common-19.3.0/AndroidManifest.xml:29:13-37
+153            android:initOrder="100" />
+153-->[com.google.firebase:firebase-common:19.3.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/c972b5801661d054e8b332d4d4133f84/jetified-firebase-common-19.3.0/AndroidManifest.xml:30:13-36
+154
+155        <activity
+155-->[com.google.android.gms:play-services-base:17.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ae7da85b9f53d8a3ce0b2d66e0f66900/jetified-play-services-base-17.1.0/AndroidManifest.xml:23:9-26:75
+156            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+156-->[com.google.android.gms:play-services-base:17.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ae7da85b9f53d8a3ce0b2d66e0f66900/jetified-play-services-base-17.1.0/AndroidManifest.xml:24:13-79
+157            android:exported="false"
+157-->[com.google.android.gms:play-services-base:17.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ae7da85b9f53d8a3ce0b2d66e0f66900/jetified-play-services-base-17.1.0/AndroidManifest.xml:25:13-37
+158            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+158-->[com.google.android.gms:play-services-base:17.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/ae7da85b9f53d8a3ce0b2d66e0f66900/jetified-play-services-base-17.1.0/AndroidManifest.xml:26:13-72
+159
+160        <meta-data
+160-->[com.google.android.gms:play-services-basement:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/5682a064c572447632fad03b71819032/jetified-play-services-basement-17.0.0/AndroidManifest.xml:23:9-25:69
+161            android:name="com.google.android.gms.version"
+161-->[com.google.android.gms:play-services-basement:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/5682a064c572447632fad03b71819032/jetified-play-services-basement-17.0.0/AndroidManifest.xml:24:13-58
+162            android:value="@integer/google_play_services_version" />
+162-->[com.google.android.gms:play-services-basement:17.0.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/5682a064c572447632fad03b71819032/jetified-play-services-basement-17.0.0/AndroidManifest.xml:25:13-66
+163
+164        <provider
+164-->[androidx.lifecycle:lifecycle-process:2.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/4a63b09a226fa09f04c64d5cfd4682fc/jetified-lifecycle-process-2.1.0/AndroidManifest.xml:23:9-27:43
+165            android:name="androidx.lifecycle.ProcessLifecycleOwnerInitializer"
+165-->[androidx.lifecycle:lifecycle-process:2.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/4a63b09a226fa09f04c64d5cfd4682fc/jetified-lifecycle-process-2.1.0/AndroidManifest.xml:24:13-79
+166            android:authorities="com.hekman.accalendar.lifecycle-process"
+166-->[androidx.lifecycle:lifecycle-process:2.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/4a63b09a226fa09f04c64d5cfd4682fc/jetified-lifecycle-process-2.1.0/AndroidManifest.xml:25:13-69
+167            android:exported="false"
+167-->[androidx.lifecycle:lifecycle-process:2.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/4a63b09a226fa09f04c64d5cfd4682fc/jetified-lifecycle-process-2.1.0/AndroidManifest.xml:26:13-37
+168            android:multiprocess="true" />
+168-->[androidx.lifecycle:lifecycle-process:2.1.0] /Users/hannah/.gradle/caches/transforms-2/files-2.1/4a63b09a226fa09f04c64d5cfd4682fc/jetified-lifecycle-process-2.1.0/AndroidManifest.xml:27:13-40
+169    </application>
+170
+171</manifest>

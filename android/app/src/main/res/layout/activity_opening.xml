@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/leafbackground"
+    tools:context="com.example.accalendar.MainActivity">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="472dp"
+                android:layout_height="256dp"
+                android:src="@mipmap/logo" />
+
+            <Button
+                android:id="@+id/login"
+                android:layout_width="117dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:background="#83D6AA"
+                android:fontFamily="@font/josefin_sans"
+                android:text="Log In"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/signup"
+                android:layout_width="117dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:background="#83D6AA"
+                android:fontFamily="@font/josefin_sans"
+                android:text="Sign Up"
+                android:textColor="@android:color/white" />
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/AppTheme.AppBarOverlay"/>
+
+            <com.google.android.gms.common.SignInButton
+                android:id="@+id/sign_in_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                app:buttonSize="standard"
+                app:layout_anchor="@+id/include" />
+    </LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Animal-Crossing-Calendar.iml" filepath="$PROJECT_DIR$/.idea/Animal-Crossing-Calendar.iml" group="Animal-Crossing-Calendar" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Animal-Crossing-Calendar/app" />
     </modules>
   </component>
 </project>
