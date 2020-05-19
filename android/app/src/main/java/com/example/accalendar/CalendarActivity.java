@@ -16,7 +16,7 @@ import com.example.accalendar.decorators.EventDecorator;
 import com.example.accalendar.decorators.ResourceDecorator;
 import com.example.accalendar.decorators.SpecialDecorator;
 import com.example.accalendar.decorators.TourneyDecorator;
-import com.example.accalendar.listviewadapters.EventAdapter;
+import com.example.accalendar.adapters.EventAdapter;
 import com.example.accalendar.utils.DocSnapToData;
 import com.example.accalendar.utils.InflateLayouts;
 import com.example.accalendar.utils.TargetDrawable;
@@ -28,6 +28,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -51,8 +52,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -201,8 +200,9 @@ public class CalendarActivity extends AppCompatActivity
             title.setText(month.substring(0, 1) + month.substring(1, month.length()).toLowerCase() + " " +
                     day.getDayOfMonth() + ", " + day.getYear() + " Events");
             popView.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.roundedpopup));
-            PopupWindow popWindow = new PopupWindow(popView, 900,
-                    800, true);
+            DisplayMetrics metrics = getApplicationContext().getResources().getDisplayMetrics();
+            PopupWindow popWindow = new PopupWindow(popView,  (int) (metrics.density*325+0.5f),
+                    (int) (metrics.density*300+0.5f), true);
             if (Build.VERSION.SDK_INT >= 21) {
                 popWindow.setElevation(5.0f);
             }
