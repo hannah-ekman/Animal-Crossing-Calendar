@@ -9,9 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.accalendar.utils.DocSnapToData;
+import com.example.accalendar.adapters.RecyclerviewAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -26,7 +28,10 @@ public class Fish extends AppCompatActivity {
     RecyclerviewAdapter adapter;
     private FirebaseFirestore db;
     private Map<String, Object> fish = new HashMap<>();
+    private ArrayList<Boolean> isNorth = new ArrayList<>();
     private static final String TAG = "fish";
+    private FirebaseAuth mAuth;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -35,9 +40,13 @@ public class Fish extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         RecyclerView recyclerView = findViewById(R.id.fish_grid);
         int numColumns = 5;
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+        isNorth.add(false);
         getFish();
+        getUserInfo();
         recyclerView.setLayoutManager(new GridLayoutManager(this,  numColumns));
-        adapter = new RecyclerviewAdapter(this, fish);
+        adapter = new RecyclerviewAdapter(this, fish, isNorth);
         recyclerView.setAdapter(adapter);
     }
 
@@ -51,6 +60,27 @@ public class Fish extends AppCompatActivity {
                     if (doc.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
                         fish.putAll(doc.getData()); // Need to use putAll to actually change the data vs just changing the reference
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void getUserInfo() {
+        DocumentReference docRef = db.collection("users").document(user.getUid());
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
+                        isNorth.set(0, ((Boolean) doc.get("isNorthern")));
                         adapter.notifyDataSetChanged();
                     } else {
                         Log.d(TAG, "No such document");

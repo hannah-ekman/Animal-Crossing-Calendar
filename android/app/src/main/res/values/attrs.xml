@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MonthView">
+        <attr name="rectangleColor" format="color" />
+        <attr name="highlightColor" format="color"></attr>
+        <attr name="startMonth" format="integer"></attr>
+        <attr name="endMonth" format="integer"></attr>
+    </declare-styleable>
+</resources>
