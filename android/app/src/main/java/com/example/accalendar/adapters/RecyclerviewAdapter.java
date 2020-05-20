@@ -18,8 +18,10 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.accalendar.R;
 import com.example.accalendar.views.MonthView;
+import com.example.accalendar.views.TimeView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -56,9 +58,12 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
         this.keys = new ArrayList<>(fish.keySet());
         final Map<String, Object> entry = (Map<String, Object>) fish.get(keys.get(position));
         String url = (String) entry.get("image");
-        Picasso.get().load(url).into(holder.myImageView);
+        Picasso.get().setLoggingEnabled(true);
+        //Picasso.get().load(url).into(holder.myImageView);
+        Glide.with(holder.itemView.getContext()).load(url).into(holder.myImageView);
         final int startMonth;
         final int endMonth;
+        final int[] timeBools = fillTimeBools((ArrayList<Map<String, Long>>) entry.get("times"));
         if (isNorth.get(0)) {
             startMonth = ((Map<String, Long>) entry.get("north")).get("start month").intValue();
             endMonth = ((Map<String, Long>) entry.get("north")).get("end month").intValue();
@@ -77,15 +82,17 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
                 TextView price = popView.findViewById(R.id.fish_price_value);
                 price.setText(((Long) entry.get("price")).toString());
                 TextView shadow = popView.findViewById(R.id.fish_shadow_value);
-                shadow.setText(((Long) entry.get("shadow size")).toString());
+                shadow.setText((String) entry.get("shadow size"));
                 TextView location = popView.findViewById(R.id.fish_location_value);
                 location.setText((String) entry.get("location"));
                 MonthView monthInfo = popView.findViewById(R.id.fish_months);
                 monthInfo.setStartAndEndMonths(startMonth, endMonth);
+                TimeView timeInfo = popView.findViewById(R.id.fish_times);
+                timeInfo.setTimes(timeBools);
                 popView.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedpopup));
-                DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+                DisplayMetrics metrics = context.getResources().getDisplayMetrics(); // used to convert px to dp
                 PopupWindow popWindow = new PopupWindow(popView, (int) (metrics.density*325+0.5f),
-                        (int) (metrics.density*300+0.5f), true);
+                        (int) (metrics.density*350+0.5f), true);
                 if (Build.VERSION.SDK_INT >= 21) {
                     popWindow.setElevation(5.0f);
                 }
@@ -94,6 +101,31 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
             }
         });
 
+    }
+
+    // Sets the times the fish is available to 1 and the rest to 0 -> used in the TimeView
+    private int[] fillTimeBools(ArrayList<Map<String, Long>> times) {
+        int startTime, endTime;
+        int[] timeBools = new int[25];
+        for(int i = 0; i<25; i++)
+            timeBools[i] = 0;
+        // Iterate through each time in the array (this was to deal with the piranha lol)
+        for(int timeIdx = 0; timeIdx < times.size(); timeIdx++) {
+            Map<String, Long> time = times.get(timeIdx);
+            startTime = time.get("start").intValue();
+            endTime = time.get("end").intValue();
+            // If startTime is before endTime -> fill all times from start to end with 1
+            if(startTime <= endTime) {
+                for(int i = startTime; i <= endTime; i++)
+                    timeBools[i] = 1;
+            } else { // start is after end -> fill all times before start and times after end with 1
+                for(int i = 0; i <= endTime; i++)
+                    timeBools[i] = 1;
+                for(int i = startTime; i < 25; i++)
+                    timeBools[i] = 1;
+            }
+        }
+        return timeBools;
     }
 
     //total number of cells

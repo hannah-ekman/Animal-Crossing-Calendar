@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 card_view:cardBackgroundColor="@color/event"
-                card_view:cardCornerRadius="20dp"
+                card_view:cardCornerRadius="10dp"
                 card_view:cardElevation="0dp"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintStart_toStartOf="parent"
@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 card_view:cardBackgroundColor="@color/event"
-                card_view:cardCornerRadius="20dp"
+                card_view:cardCornerRadius="10dp"
                 card_view:cardElevation="0dp"
                 card_view:layout_constraintEnd_toStartOf="@id/guideline"
                 card_view:layout_constraintStart_toStartOf="parent"
@@ -117,7 +117,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="4dp"
-                        android:text="Shadow Size:"
+                        android:text="Size:"
                         android:textColor="@android:color/white"
                         android:textSize="16dp"
                         android:textStyle="bold"
@@ -145,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 card_view:cardBackgroundColor="@color/event"
-                card_view:cardCornerRadius="20dp"
+                card_view:cardCornerRadius="10dp"
                 card_view:cardElevation="0dp"
                 card_view:layout_constraintStart_toEndOf="@id/guideline"
                 card_view:layout_constraintEnd_toEndOf="parent"
@@ -187,15 +187,25 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
             <com.example.accalendar.views.MonthView
-                card_view:layout_constraintTop_toBottomOf="@+id/fish_price"
+            card_view:layout_constraintTop_toBottomOf="@+id/fish_price"
+            card_view:layout_constraintEnd_toEndOf="parent"
+            card_view:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/fish_months"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_margin="8dp"
+            card_view:rectangleColor="@color/event"
+            card_view:highlightColor="@color/popupBorder" />
+            <com.example.accalendar.views.TimeView
+                card_view:layout_constraintTop_toBottomOf="@+id/fish_months"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintStart_toStartOf="parent"
-                android:id="@+id/fish_months"
+                android:id="@+id/fish_times"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="50dp"
                 android:layout_margin="8dp"
-                card_view:rectangleColor="@color/event"
-                card_view:highlightColor="@color/popupBorder" />
+                card_view:timeRectangleColor="@color/event"
+                card_view:timeBackgroundColor="@color/popupBorder"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </LinearLayout>

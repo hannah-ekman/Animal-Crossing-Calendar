@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.View;
 
 import com.example.accalendar.R;
@@ -17,7 +18,6 @@ public class MonthView extends View {
     private int rectangleCol, highlightCol;
     //paint for drawing custom view
     private Paint paint;
-
     // starting month the item becomes available
     private int startMonth;
     // last month the item is available
@@ -27,9 +27,12 @@ public class MonthView extends View {
     // array used to decide if we fill the square
     private boolean[] monthBools = new boolean[12];
     private String[] months = new String[]{"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+    private final Context context;
 
     public MonthView(Context context, AttributeSet attrs){
         super(context, attrs);
+
+        this.context = context;
 
         //paint object for drawing in onDraw
         paint = new Paint();
@@ -143,7 +146,8 @@ public class MonthView extends View {
         );
 
         // Define the corners radius of rounded rectangle
-        int cornersRadius = 20;
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        int cornersRadius = (int) (metrics.density*10+0.5f);
 
         // Draw the rounded corners rectangle object on the canvas
         canvas.drawRoundRect(
@@ -155,10 +159,10 @@ public class MonthView extends View {
 
         int w = getWidth();
         int h = getHeight();
-        int interval = w/6; // used to split the rectangle into 6 even boxes
+        float interval = w/6f; // used to split the rectangle into 6 even boxes
         int textYPos;
         paint.setStrokeWidth(4);
-        paint.setTextSize(35);
+        paint.setTextSize((int) (metrics.density*16+0.5f));
         paint.setTextAlign(Paint.Align.CENTER);
         // have to start at i = 1 because we don't want to draw a line on the edge of the rectangle (0,0) coord.
         // We only need 5 vertical lines inside the rectangle to create 6 boxes
@@ -238,12 +242,12 @@ public class MonthView extends View {
                     paint // Paint
             );
         }
+        // draw a horizontal line to cut the rectangle in half (creating 12 boxes)
+        canvas.drawLine(0, h/2, w, h/2, paint);
         paint.setColor(Color.WHITE);
         textYPos = (h / 4) - (int) (paint.descent() + paint.ascent()) / 2;
         canvas.drawText(months[6-1], (interval*6+interval*(6-1))/2, textYPos, paint);
         textYPos = 3*(h / 4) - (int) (paint.descent() + paint.ascent()) / 2;
         canvas.drawText(months[6-1+6], (interval*6+interval*(6-1))/2, textYPos, paint);
-        // draw a horizontal line to cut the rectangle in half (creating 12 boxes)
-        canvas.drawLine(0, h/2, w, h/2, paint);
     }
 }

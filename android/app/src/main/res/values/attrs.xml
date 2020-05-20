@@ -2,8 +2,13 @@
 <resources>
     <declare-styleable name="MonthView">
         <attr name="rectangleColor" format="color" />
-        <attr name="highlightColor" format="color"></attr>
-        <attr name="startMonth" format="integer"></attr>
-        <attr name="endMonth" format="integer"></attr>
+        <attr name="highlightColor" format="color" />
+        <attr name="startMonth" format="integer" />
+        <attr name="endMonth" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="TimeView">
+        <attr name="timeRectangleColor" format="color" />
+        <attr name="timeBackgroundColor" format="color" />
+        <attr name="times" format="reference" />
     </declare-styleable>
 </resources>
