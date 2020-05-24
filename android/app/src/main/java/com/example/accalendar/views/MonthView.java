@@ -25,7 +25,7 @@ public class MonthView extends View {
     // rectangle used for drawing
     private RectF rectF;
     // array used to decide if we fill the square
-    private boolean[] monthBools = new boolean[12];
+    private boolean[] monthBools;
     private String[] months = new String[]{"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
     private final Context context;
 
@@ -46,42 +46,12 @@ public class MonthView extends View {
             //get the dates and colors specified using the names in attrs.xml
             rectangleCol = a.getInteger(R.styleable.MonthView_rectangleColor, 0);//0 is default
             highlightCol = a.getInteger(R.styleable.MonthView_highlightColor, 0);
-            startMonth = a.getInteger(R.styleable.MonthView_startMonth, 1);
-            endMonth = a.getInteger(R.styleable.MonthView_endMonth, 1);
-
-            fillMonthBools();
         } finally {
             a.recycle();
         }
     }
-    // Sets the months that the item is available to true
-    private void fillMonthBools() {
-        for(int i = 0; i<12; i++)
-            monthBools[i] = false;
-        // if the starting month is before the end month
-        if (startMonth <= endMonth) {
-            for(int i = startMonth-1; i<=endMonth-1; i++) {
-                monthBools[i] = true;
-            }
-        } else { // if the starting month is after the end month (so it wraps around the year)
-            for(int i = 0; i <= endMonth-1; i++) {
-                monthBools[i] = true;
-            }
-            for(int i = startMonth-1; i<12; i++) {
-                monthBools[i] = true;
-            }
-        }
-    }
 
     // get and set functions
-
-    public int getStartMonth() {
-        return startMonth;
-    }
-
-    public int getEndMonth() {
-        return endMonth;
-    }
 
     public int getRectangleColor(){
         return rectangleCol;
@@ -91,10 +61,8 @@ public class MonthView extends View {
         return highlightCol;
     }
 
-    public void setStartAndEndMonths(int startMonth, int endMonth) {
-        this.startMonth = startMonth;
-        this.endMonth = endMonth;
-        fillMonthBools();
+    public void setMonths(boolean[] monthBools) {
+        this.monthBools = monthBools;
         //redraw the view
         invalidate();
         requestLayout();
@@ -102,14 +70,14 @@ public class MonthView extends View {
 
     public void setRectangleColor(int newColor){
         //update the instance variable
-        rectangleCol=newColor;
+        rectangleCol = newColor;
         //redraw the view
         invalidate();
         requestLayout();
     }
     public void setHighlightColor(int newColor){
         //update the instance variable
-        highlightCol=newColor;
+        highlightCol = newColor;
         //redraw the view
         invalidate();
         requestLayout();

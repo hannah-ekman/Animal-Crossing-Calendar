@@ -10,7 +10,7 @@ import datetime
 
 #Probably gonna have to make this more generalized so we can use it for bugs as well
 
-cred=credentials.Certificate('./animal-crossing-calendar-firebase-adminsdk-8on8r-e5ebda36ce.json')
+cred=credentials.Certificate('./service-account.json') #I'm gitignoring this so that it's not publicly available online, I'll send it to you
 firebase_admin.initialize_app(cred, {
     'storageBucket': 'animal-crossing-calendar.appspot.com',
     'projectId': 'animal-crossing-calendar',
@@ -101,21 +101,21 @@ def make_folder(name):
 #parse the months from the html...this function has to change... :(
 def parseMonths(months):
     start = 0
-    potenStartFound = False
+    startFound = False
     end = 0
-    endFound = False
+    monthArray = []
     for i in range(len(months)):
-        if months[i] == "✓" and not potenStartFound:
+        if months[i] == "✓" and not startFound:
             start = i+1
-            potenStartFound = True
-        elif months[i] == "-" and potenStartFound and not endFound:
+            startFound = True
+        elif months[i] == "-" and startFound:
             end = i
-            endFound = True
-        elif months[i] == "✓" and endFound:
-            start = i+1
-    if not endFound:
+            monthArray.append({"start": start, "end": end})
+            startFound = False
+    if startFound:
         end = 12
-    return {"start": start, "end": end}
+        monthArray.append({"start": start, "end": end})
+    return monthArray
 
 #Parses the time string from html and returns an array of start and end times the fish is available
 def parseTime(timeStr):
@@ -220,8 +220,8 @@ def get_images(r):
                 u"location": location,
                 u"shadow size": shadow,
                 u"times": time,
-                u"north": {u"start month": monthN["start"], u"end month": monthN["end"]},
-                u"south": {u"start month": monthS["start"], u"end month": monthS["end"]}
+                u"north": monthN,
+                u"south": monthS
             }
         }
         print(name, fishInfo)

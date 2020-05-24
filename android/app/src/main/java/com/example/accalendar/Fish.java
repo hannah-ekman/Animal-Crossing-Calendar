@@ -29,6 +29,7 @@ public class Fish extends AppCompatActivity {
     private FirebaseFirestore db;
     private Map<String, Object> fish = new HashMap<>();
     private ArrayList<Boolean> isNorth = new ArrayList<>();
+    private Map<String, Object> caught = new HashMap<>();
     private static final String TAG = "fish";
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -39,14 +40,16 @@ public class Fish extends AppCompatActivity {
         setContentView(R.layout.activity_fish);
         db = FirebaseFirestore.getInstance();
         RecyclerView recyclerView = findViewById(R.id.fish_grid);
-        int numColumns = 5;
+        int numColumns = 4;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         isNorth.add(false);
         getFish();
         getUserInfo();
         recyclerView.setLayoutManager(new GridLayoutManager(this,  numColumns));
-        adapter = new RecyclerviewAdapter(this, fish, isNorth);
+        DocumentReference fishRef = db.collection("users").document(user.getUid())
+                .collection("fish").document("caught");
+        adapter = new RecyclerviewAdapter(this, fish, isNorth, caught, fishRef);
         recyclerView.setAdapter(adapter);
     }
 
@@ -72,7 +75,7 @@ public class Fish extends AppCompatActivity {
     }
 
     private void getUserInfo() {
-        DocumentReference docRef = db.collection("users").document(user.getUid());
+        final DocumentReference docRef = db.collection("users").document(user.getUid());
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -90,6 +93,26 @@ public class Fish extends AppCompatActivity {
                 }
             }
         });
+        final DocumentReference fishRef = db.collection("users").document(user.getUid())
+                .collection("fish").document("caught");
+        fishRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
+                        caught.putAll(doc.getData());
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        fishRef.set(new HashMap<>());
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+
     }
 
     /*

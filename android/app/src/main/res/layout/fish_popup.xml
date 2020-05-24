@@ -35,6 +35,15 @@
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toTopOf="parent" />
 
+            <CheckBox android:id="@+id/checkbox_fish"
+                android:layout_margin="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="@android:color/white"
+                card_view:layout_constraintTop_toTopOf="@id/cardtitle"
+                card_view:layout_constraintBottom_toBottomOf="@id/cardtitle"
+                card_view:layout_constraintEnd_toEndOf="parent"/>
+
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/guideline"

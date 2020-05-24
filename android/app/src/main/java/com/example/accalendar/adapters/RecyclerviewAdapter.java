@@ -9,6 +9,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -22,9 +24,17 @@ import com.bumptech.glide.Glide;
 import com.example.accalendar.R;
 import com.example.accalendar.views.MonthView;
 import com.example.accalendar.views.TimeView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapter.ViewHolder> {
@@ -35,12 +45,17 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     private LayoutInflater mInflater;
     private final Context context;
     private final ArrayList<Boolean> isNorth;
+    private DocumentReference docRef;
+    private Map<String, Object> caught;
 
-    public RecyclerviewAdapter(Context context, Map<String, Object> fish, ArrayList<Boolean> isNorth){
+    public RecyclerviewAdapter(Context context, Map<String, Object> fish, ArrayList<Boolean> isNorth,
+                                Map<String, Object> caught, DocumentReference docRef) {
         this.mInflater = LayoutInflater.from(context);
         this.fish = fish;
         this.context = context;
         this.isNorth = isNorth;
+        this.caught = caught;
+        this.docRef = docRef;
     }
 
     //inflates cell layout from xml
@@ -54,31 +69,35 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     //binds data to the ImageView to each cell
     //original post used textview, so I need to hammer this part out
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position){
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position){
         this.keys = new ArrayList<>(fish.keySet());
+        final String name = keys.get(position);
         final Map<String, Object> entry = (Map<String, Object>) fish.get(keys.get(position));
         String url = (String) entry.get("image");
         Picasso.get().setLoggingEnabled(true);
         //Picasso.get().load(url).into(holder.myImageView);
         Glide.with(holder.itemView.getContext()).load(url).into(holder.myImageView);
-        final int startMonth;
-        final int endMonth;
+        ArrayList<Map<String, Long>> months;
         final int[] timeBools = fillTimeBools((ArrayList<Map<String, Long>>) entry.get("times"));
         if (isNorth.get(0)) {
-            startMonth = ((Map<String, Long>) entry.get("north")).get("start month").intValue();
-            endMonth = ((Map<String, Long>) entry.get("north")).get("end month").intValue();
+            months = ((ArrayList<Map<String, Long>>) entry.get("north"));
         } else {
-            startMonth = ((Map<String, Long>) entry.get("south")).get("start month").intValue();
-            endMonth = ((Map<String, Long>) entry.get("south")).get("end month").intValue();
+            months = ((ArrayList<Map<String, Long>>) entry.get("south"));
         }
+        if (!caught.containsKey(name)) {
+            caught.put(name, false);
+        } else if ((Boolean) caught.get(name)) {
+            holder.itemView.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedpopup));
+        }
+        final boolean[] monthBools = fillMonthBools(months);
         holder.myImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // fill popup with corresponding fish info
-                Log.d(TAG, "onClick: clicked on: " + keys.get(position));
+                Log.d(TAG, "onClick: clicked on: " + name);
                 View popView = mInflater.inflate(R.layout.fish_popup, null);
                 TextView fishName = popView.findViewById(R.id.cardtitle);
-                fishName.setText(keys.get(position));
+                fishName.setText(name);
                 TextView price = popView.findViewById(R.id.fish_price_value);
                 price.setText(((Long) entry.get("price")).toString());
                 TextView shadow = popView.findViewById(R.id.fish_shadow_value);
@@ -86,9 +105,26 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
                 TextView location = popView.findViewById(R.id.fish_location_value);
                 location.setText((String) entry.get("location"));
                 MonthView monthInfo = popView.findViewById(R.id.fish_months);
-                monthInfo.setStartAndEndMonths(startMonth, endMonth);
+                monthInfo.setMonths(monthBools);
                 TimeView timeInfo = popView.findViewById(R.id.fish_times);
                 timeInfo.setTimes(timeBools);
+                CheckBox checkBox = popView.findViewById(R.id.checkbox_fish);
+                checkBox.setChecked((Boolean) caught.get(name));
+                checkBox.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        boolean isChecked = ((CheckBox) view).isChecked();
+                        Map<String, Object> checked = new HashMap<>();
+                        checked.put(name, isChecked);
+                        caught.put(name, isChecked);
+                        docRef.update(checked);
+                        if (isChecked) {
+                            holder.itemView.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedpopup));
+                        } else {
+                            holder.itemView.setBackgroundResource(0);
+                        }
+                    }
+                });
                 popView.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedpopup));
                 DisplayMetrics metrics = context.getResources().getDisplayMetrics(); // used to convert px to dp
                 PopupWindow popWindow = new PopupWindow(popView, (int) (metrics.density*325+0.5f),
@@ -101,6 +137,21 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
             }
         });
 
+    }
+
+    private boolean[] fillMonthBools(ArrayList<Map<String, Long>> months){
+        int monthStart, monthEnd;
+        boolean[] monthBools = new boolean[12];
+        for(int i = 0; i<12; i++)
+            monthBools[i] = false;
+        for(int monthIdx = 0; monthIdx < months.size(); monthIdx++) {
+            Map<String, Long> month = months.get(monthIdx);
+            monthStart = month.get("start").intValue();
+            monthEnd = month.get("end").intValue();
+            for(int i = monthStart; i <= monthEnd; i++)
+                monthBools[i-1] = true;
+        }
+        return monthBools;
     }
 
     // Sets the times the fish is available to 1 and the rest to 0 -> used in the TimeView
