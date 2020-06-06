@@ -6,9 +6,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
+
+import androidx.core.content.res.ResourcesCompat;
 
 import com.example.accalendar.R;
 
@@ -118,6 +121,8 @@ public class TimeView extends View {
         paint.setStrokeWidth(5);
         paint.setTextSize((int) (metrics.density*12+0.5f));
         paint.setTextAlign(Paint.Align.CENTER);
+        Typeface font = ResourcesCompat.getFont(context, R.font.josefin_sans_semibold);
+        paint.setTypeface(font);
         int lineStart, lineEnd, lineTop, lineBottom, time,
                 fontHeight = (int) (paint.descent()-paint.ascent()); // gets the height of the font
         String am = "AM", pm = "PM";

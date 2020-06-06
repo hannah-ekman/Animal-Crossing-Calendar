@@ -17,6 +17,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -86,8 +87,11 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
         }
         if (!caught.containsKey(name)) {
             caught.put(name, false);
+            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.missing_card));
         } else if ((Boolean) caught.get(name)) {
-            holder.itemView.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedpopup));
+            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.caught_fish));
+        } else {
+            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.missing_card));
         }
         final boolean[] monthBools = fillMonthBools(months);
         holder.myImageView.setOnClickListener(new View.OnClickListener() {
@@ -119,13 +123,13 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
                         caught.put(name, isChecked);
                         docRef.update(checked);
                         if (isChecked) {
-                            holder.itemView.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedpopup));
+                            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.caught_fish));
                         } else {
-                            holder.itemView.setBackgroundResource(0);
+                            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.missing_card));
                         }
                     }
                 });
-                popView.setBackground(ContextCompat.getDrawable(context, R.drawable.roundedpopup));
+                popView.setBackground(ContextCompat.getDrawable(context, R.drawable.fishpopup));
                 DisplayMetrics metrics = context.getResources().getDisplayMetrics(); // used to convert px to dp
                 PopupWindow popWindow = new PopupWindow(popView, (int) (metrics.density*325+0.5f),
                         (int) (metrics.density*350+0.5f), true);
@@ -137,6 +141,11 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
             }
         });
 
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     private boolean[] fillMonthBools(ArrayList<Map<String, Long>> months){
@@ -190,10 +199,12 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     //implements ViewHolder stuff so it doesn't show up as an error
     class ViewHolder extends RecyclerView.ViewHolder {
         ImageView myImageView;
+        ConstraintLayout myConstraintLayout;
 
         ViewHolder(View itemView){
             super(itemView);
             myImageView = itemView.findViewById(R.id.fishimg);
+            myConstraintLayout = itemView.findViewById(R.id.fishconstraint);
             //itemView.setOnClickListener(this);
         }
     }

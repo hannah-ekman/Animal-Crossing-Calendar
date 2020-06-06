@@ -12,5 +12,9 @@
     <color name="resources">#ffb0b0</color>
     <color name="special">#71b3c9</color>
     <color name="backgroundGreen">#BCEDD2</color>
+    <color name="caughtFish">#6eb3e7</color>
+    <color name="fishborder">#5090c9</color>
+    <color name="fishPopUp">#95d0f3</color>
+    <color name="transparentWhite">#50ffffff</color>
 </resources>
 

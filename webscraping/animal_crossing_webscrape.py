@@ -7,8 +7,11 @@ import requests
 from lxml import html
 import os
 import datetime
+from enum import Enum
 
 #Probably gonna have to make this more generalized so we can use it for bugs as well
+
+Entity = Enum('Entity', 'fish bug')
 
 cred=credentials.Certificate('./service-account.json') #I'm gitignoring this so that it's not publicly available online, I'll send it to you
 firebase_admin.initialize_app(cred, {
@@ -143,26 +146,26 @@ def parseTime(timeStr):
     return timeArr
 
 #download the image from the url to local then upload the local file to firebase
-def uploadToFirestore(url, name):
+def uploadToFirestore(url, name, entity):
     curr_dir = os.getcwd()
     folder = 'acPic'
     dir_path = os.path.join(curr_dir, folder)
     if not os.path.exists(dir_path):
         os.mkdir(dir_path)
     urllib.request.urlretrieve(url, os.path.join(dir_path, name+'.png'))
-    blob = bucket.blob("fish/"+name+'.png')
-    blob.make_public() #I don't think this does anything but whatever LOL
+    blob = bucket.blob(entity.name+"/"+name+'.png')
     blob.upload_from_filename(os.path.join(dir_path, name+'.png'), predefined_acl='publicRead')
+    blob.make_public() #I don't think this does anything but whatever LOL
     d = datetime.datetime(datetime.MAXYEAR, 4, 13) #Date time used to set the signed url expiration (so far in the future that it basically doesn't expire)
     url = blob.generate_signed_url(expiration=d) #Generate the signed url to pass to firebase since pulic_url isn't actually public...
     return url
 
-def uploadToFirebase(entry):
-    db.collection(u'trackables').document(u'fish').update(entry)
+def uploadToFirebase(entry, entity):
+    db.collection(u'trackables').document(entity.name).update(entry)
 
 #beautifulsoup object with raw HTML content and parser passed in
 #lxml is the default parser
-def get_images(r): 
+def get_images(r, entity): 
     soup = bs(r, features="lxml")
     northern = str(soup.find('table', {'class': 'northern'}))
     southern = str(soup.find('table', {'class': 'southern'}))
@@ -180,7 +183,9 @@ def get_images(r):
         price = int(str(northernSoup.find('td', {'class': 'price'}).contents[0]).strip().replace(',', ''))
         icon = northernSoup.find('a', {"class": "image image-thumbnail"})['href']
         location = str(northernSoup.find('td', {"class": 'location'}).contents[0]).strip()
-        shadow = str(northernSoup.find('td', {'class': 'shadow size'}).contents[0]).strip()
+        shadow = None
+        if entity == Entity.fish:
+            shadow = str(northernSoup.find('td', {'class': 'shadow size'}).contents[0]).strip()
         time = str(northernSoup.find('td', {'class': 'time'}).contents[0]).strip()
         janN = str(northernSoup.find('td', {'class': 'jan'}).contents[0]).strip()
         febN = str(northernSoup.find('td', {'class': 'feb'}).contents[0]).strip()
@@ -209,7 +214,7 @@ def get_images(r):
         
         monthN = [janN, febN, marN, aprN, mayN, junN, julN, augN, sepN, octN, novN, decN]
         monthS = [janS, febS, marS, aprS, mayS, junS, julS, augS, sepS, octS, novS, decS]
-        url = uploadToFirestore(icon, name)
+        url = uploadToFirestore(icon, name, entity)
         monthN = parseMonths(monthN)
         monthS = parseMonths(monthS)
         time = parseTime(time)
@@ -218,17 +223,22 @@ def get_images(r):
                 u"price": price,
                 u"image": url,
                 u"location": location,
-                u"shadow size": shadow,
                 u"times": time,
                 u"north": monthN,
-                u"south": monthS
+                u"south": monthS,
+                u"index": i
             }
         }
+        if entity == Entity.fish:
+            fishInfo[u"shadow size"]: shadow
         print(name, fishInfo)
-        uploadToFirebase(fishInfo)
+        uploadToFirebase(fishInfo, entity)
 
 f = open('fish.html', 'r')
-get_images(f)
+get_images(f, Entity.fish)
+f.close()
+f = open('bug.html', 'r')
+get_images(f, Entity.bug)
 #get_images(r, make_folder('FishPic'))
 #get_images(r2, make_folder('BugPic'))
 #get_images(r3, make_folder('FossilPic'))

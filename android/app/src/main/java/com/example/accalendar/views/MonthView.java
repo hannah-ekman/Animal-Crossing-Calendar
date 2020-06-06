@@ -7,9 +7,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
+
+import androidx.core.content.res.ResourcesCompat;
 
 import com.example.accalendar.R;
 
@@ -129,6 +132,8 @@ public class MonthView extends View {
         int h = getHeight();
         float interval = w/6f; // used to split the rectangle into 6 even boxes
         int textYPos;
+        Typeface font = ResourcesCompat.getFont(context, R.font.josefin_sans_semibold);
+        paint.setTypeface(font);
         paint.setStrokeWidth(4);
         paint.setTextSize((int) (metrics.density*16+0.5f));
         paint.setTextAlign(Paint.Align.CENTER);
@@ -174,10 +179,10 @@ public class MonthView extends View {
             // set text color to be white
             paint.setColor(Color.WHITE);
             // center the text vertically in the top box
-            textYPos = (h / 4) - (int) (paint.descent() + paint.ascent()) / 2;
+            textYPos = (h / 4) - (int) (paint.ascent()) / 2;
             canvas.drawText(months[i-1], (interval*i+interval*(i-1))/2, textYPos, paint);
             //center the text vertically in the bottom box
-            textYPos = 3*(h / 4) - (int) (paint.descent() + paint.ascent()) / 2;
+            textYPos = 3*(h / 4) - (int) (paint.ascent()) / 2;
             canvas.drawText(months[i-1+6], (interval*i+interval*(i-1))/2, textYPos, paint);
         }
         // fill the last two month boxes

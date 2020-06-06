@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.accalendar.adapters.RecyclerviewAdapter;
+import com.example.accalendar.utils.DocSnapToData;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,13 +22,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Fish extends AppCompatActivity {
 
     RecyclerviewAdapter adapter;
     private FirebaseFirestore db;
-    private Map<String, Object> fish = new HashMap<>();
+    private Map<String, Object> fish = new LinkedHashMap<>();
     private ArrayList<Boolean> isNorth = new ArrayList<>();
     private Map<String, Object> caught = new HashMap<>();
     private static final String TAG = "fish";
@@ -62,7 +64,8 @@ public class Fish extends AppCompatActivity {
                     DocumentSnapshot doc = task.getResult();
                     if (doc.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
-                        fish.putAll(doc.getData()); // Need to use putAll to actually change the data vs just changing the reference
+                        HashMap<String, Object> sorted = DocSnapToData.sortHashMapByIndex(doc.getData());
+                        fish.putAll(sorted); // Need to use putAll to actually change the data vs just changing the reference
                         adapter.notifyDataSetChanged();
                     } else {
                         Log.d(TAG, "No such document");
