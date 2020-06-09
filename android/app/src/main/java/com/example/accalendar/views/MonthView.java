@@ -218,9 +218,9 @@ public class MonthView extends View {
         // draw a horizontal line to cut the rectangle in half (creating 12 boxes)
         canvas.drawLine(0, h/2, w, h/2, paint);
         paint.setColor(Color.WHITE);
-        textYPos = (h / 4) - (int) (paint.descent() + paint.ascent()) / 2;
+        textYPos = (h / 4) - (int) (paint.ascent()) / 2;
         canvas.drawText(months[6-1], (interval*6+interval*(6-1))/2, textYPos, paint);
-        textYPos = 3*(h / 4) - (int) (paint.descent() + paint.ascent()) / 2;
+        textYPos = 3*(h / 4) - (int) (paint.ascent()) / 2;
         canvas.drawText(months[6-1+6], (interval*6+interval*(6-1))/2, textYPos, paint);
     }
 }

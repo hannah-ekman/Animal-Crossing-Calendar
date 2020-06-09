@@ -15,6 +15,8 @@
     <color name="caughtFish">#6eb3e7</color>
     <color name="fishborder">#5090c9</color>
     <color name="fishPopUp">#95d0f3</color>
+    <color name="fishBackground">#95d7f9</color>
+    <color name="notCaughtFish">#b6e4fb</color>
     <color name="transparentWhite">#50ffffff</color>
 </resources>
 

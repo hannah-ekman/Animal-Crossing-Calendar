@@ -186,6 +186,7 @@ def get_images(r, entity):
         shadow = None
         if entity == Entity.fish:
             shadow = str(northernSoup.find('td', {'class': 'shadow size'}).contents[0]).strip()
+        print(shadow)
         time = str(northernSoup.find('td', {'class': 'time'}).contents[0]).strip()
         janN = str(northernSoup.find('td', {'class': 'jan'}).contents[0]).strip()
         febN = str(northernSoup.find('td', {'class': 'feb'}).contents[0]).strip()
@@ -230,7 +231,7 @@ def get_images(r, entity):
             }
         }
         if entity == Entity.fish:
-            fishInfo[u"shadow size"]: shadow
+            fishInfo[db.field_path(name)][u"shadow size"] = shadow
         print(name, fishInfo)
         uploadToFirebase(fishInfo, entity)
 

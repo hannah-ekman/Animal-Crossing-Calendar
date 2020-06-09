@@ -9,4 +9,8 @@
         <attr name="timeBackgroundColor" format="color" />
         <attr name="times" format="reference" />
     </declare-styleable>
+    <declare-styleable name="FilterView">
+        <attr name = "filterRectangleColor" format="color" />
+        <attr name = "filterHighlightColor" format="color" />
+    </declare-styleable>
 </resources>
