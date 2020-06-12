@@ -5,18 +5,66 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/fishBackground">
 
-    <ExpandableListView
-        android:id="@+id/filter"
-        app:layout_constraintTop_toTopOf="parent"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/fishScroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:divider="@android:color/white"
-        android:dividerHeight="1dp"/>
+        android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/filterby"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:background="@color/fishborder"
+                android:text="Filter By"
+                android:fontFamily="@font/josefin_sans_semibold"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toTopOf="parent"
+                android:textSize="18sp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fish_grid"
-        android:layout_width="match_parent"
-        app:layout_constraintTop_toBottomOf="@+id/filter"
-        android:layout_height="wrap_content"/>
+            <ExpandableListView
+                android:id="@+id/filter"
+                app:layout_constraintTop_toBottomOf="@+id/filterby"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@android:color/white"
+                android:dividerHeight="1dp"/>
+
+            <TextView
+                android:id="@+id/sortby"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:background="@color/fishborder"
+                android:text="Sort By"
+                android:fontFamily="@font/josefin_sans_semibold"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toBottomOf="@id/filter"
+                android:textSize="18sp" />
+
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/sort"
+                app:layout_constraintTop_toBottomOf="@+id/sortby"
+                android:layout_height="wrap_content"
+                app:flexWrap="wrap"
+                app:alignItems="center"
+                app:alignContent="center"
+                app:justifyContent="center"
+                android:layout_width="match_parent"
+                android:background="@android:color/white"
+                android:padding="8dp"/>
+
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fish_grid"
+                android:padding="4dp"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toBottomOf="@+id/sort"
+                android:layout_height="wrap_content"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

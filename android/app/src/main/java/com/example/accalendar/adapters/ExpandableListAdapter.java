@@ -29,6 +29,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     // child data in format of header title, child title
     private HashMap<String, HashMap<String, Boolean>> _listDataChild;
     private HashMap<Integer, View> views = new HashMap<>();
+    private HashMap<Integer, View> groupViews = new HashMap<>();
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, HashMap<String, Boolean>> listChildData) {
@@ -50,8 +51,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
-        final HashMap<String, Boolean> filters = (HashMap<String, Boolean>) getChild(groupPosition, childPosition);
+        return views.get(groupPosition);
+    }
 
+    @Override
+    public int getChildrenCount(int groupPosition) {
+        return 1;
+    }
+
+    public View getChild(int groupPosition) {
+        View convertView;
+        final HashMap<String, Boolean> filters = (HashMap<String, Boolean>) getChild(groupPosition, 1);
         if (!views.containsKey(groupPosition)) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -89,12 +99,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 button.setPadding(px, px, px, px);
                 Typeface typeface = Typeface.createFromAsset(_context.getAssets(), "fonts/josefin_sans_semibold.ttf");
                 button.setTypeface(typeface);
-                px = (int) TypedValue.applyDimension(
-                        TypedValue.COMPLEX_UNIT_DIP,
-                        6,
-                        _context.getResources().getDisplayMetrics()
-                );
-                button.setTextSize(px);
+                button.setTextSize(15);
                 button.setText(key);
                 button.setTextColor(Color.WHITE);
                 button.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_off_button));
@@ -118,11 +123,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public int getChildrenCount(int groupPosition) {
-        return 1;
-    }
-
-    @Override
     public Object getGroup(int groupPosition) {
         return this._listDataHeader.get(groupPosition);
     }
@@ -140,20 +140,20 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
-        String headerTitle = (String) getGroup(groupPosition);
-        if (convertView == null) {
+        if (groupViews.get(groupPosition) == null) {
+            String headerTitle = (String) getGroup(groupPosition);
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.expandablelistgroup, null);
+            TextView lblListHeader = (TextView) convertView
+                    .findViewById(R.id.text_title);
+            Typeface typeface = Typeface.createFromAsset(_context.getAssets(), "fonts/josefin_sans_semibold.ttf");
+            lblListHeader.setTypeface(typeface);
+            lblListHeader.setText(headerTitle);
+            groupViews.put(groupPosition, convertView);
         }
 
-        TextView lblListHeader = (TextView) convertView
-                .findViewById(R.id.text_title);
-        Typeface typeface = Typeface.createFromAsset(_context.getAssets(), "fonts/josefin_sans_semibold.ttf");
-        lblListHeader.setTypeface(typeface);
-        lblListHeader.setText(headerTitle);
-
-        return convertView;
+        return groupViews.get(groupPosition);
     }
 
     @Override
