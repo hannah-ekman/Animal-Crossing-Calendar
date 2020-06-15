@@ -98,9 +98,12 @@ public class Fish extends AppCompatActivity {
             public void onGroupExpand(int groupPosition) {
                 ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) list_view.getLayoutParams();
                 View child = listAdapter.getChild(groupPosition);
+                // width to use to measure with (so we don't have clipping)
                 int desiredWidth = View.MeasureSpec.makeMeasureSpec(list_view.getWidth(),
                         View.MeasureSpec.EXACTLY);
+                // measure the view since might not be drawn yet
                 child.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+                // add the height to the view's height to expand it
                 param.height = (list_view.getHeight() + child.getMeasuredHeight());
                 list_view.setLayoutParams(param);
                 list_view.refreshDrawableState();
@@ -118,6 +121,7 @@ public class Fish extends AppCompatActivity {
                 int desiredWidth = View.MeasureSpec.makeMeasureSpec(list_view.getWidth(),
                         View.MeasureSpec.EXACTLY);
                 child.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+                // subtract the height form the view's height to collapse it
                 param.height = (list_view.getHeight() - child.getMeasuredHeight());
                 list_view.setLayoutParams(param);
                 list_view.refreshDrawableState();
@@ -131,7 +135,6 @@ public class Fish extends AppCompatActivity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
-
                 return false;
             }
         });
@@ -204,6 +207,8 @@ public class Fish extends AppCompatActivity {
                             i++;
                         }
                         // then set this button to be selected
+                        DocSnapToData.sortHashMapByIndex(fish, key);
+                        adapter.notifyDataSetChanged();
                         sort.put(key, true);
                         v.setBackground(getResources().getDrawable(R.drawable.fish_filter_on_button));
                         // sort by the key here
@@ -277,7 +282,7 @@ public class Fish extends AppCompatActivity {
         listAdapter = new ExpandableListAdapter(getApplicationContext(), filterParent, filterChild);
         list_view.setAdapter(listAdapter);
         NestedScrollView scroll = findViewById(R.id.fishScroll);
-        setExpandableHeight(listAdapter, list_view, scroll);
+        setExpandableHeight(listAdapter, list_view, scroll); // set the height of the list view
     }
 
     private void getFish() {
@@ -289,8 +294,8 @@ public class Fish extends AppCompatActivity {
                     DocumentSnapshot doc = task.getResult();
                     if (doc.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
-                        HashMap<String, Object> sorted = DocSnapToData.sortHashMapByIndex(doc.getData());
-                        fish.putAll(sorted); // Need to use putAll to actually change the data vs just changing the reference
+                        fish.putAll(doc.getData());
+                        DocSnapToData.sortHashMapByIndex(fish, "Default");
                         adapter.notifyDataSetChanged();
                     } else {
                         Log.d(TAG, "No such document");

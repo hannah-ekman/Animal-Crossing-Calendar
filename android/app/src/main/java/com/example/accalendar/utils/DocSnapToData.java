@@ -73,29 +73,40 @@ public class DocSnapToData {
         return events;
     }
 
-    public static HashMap<String, Object> sortHashMapByIndex(Map<String, Object> map) {
+    public static void sortHashMapByIndex(Map<String, Object> map, String key) {
         // Create a list from elements of HashMap
         List<Map.Entry<String, Object>> list =
                 new ArrayList<>(map.entrySet());
 
+        String sortBy = "index";
+        if(key == "Price")
+            sortBy = "price";
+        else if (key == "Name")
+            sortBy = "name";
+
         // Sort the list
+        final String finalSortBy = sortBy;
         Collections.sort(list, new Comparator<Map.Entry<String, Object>>() {
             @Override
             public int compare(Map.Entry<String, Object> o1, Map.Entry<String, Object> o2) {
-                Map<String, Object> fish1 = (Map<String, Object>) o1.getValue();
-                Map<String, Object> fish2 = (Map<String, Object>) o2.getValue();
-                Long i1 = (Long) fish1.get("index");
-                Long i2 = (Long) fish2.get("index");
-                return i1.compareTo(i2);
+                if(finalSortBy == "name"){
+                    String fish1 = o1.getKey();
+                    String fish2 = o2.getKey();
+                    return fish1.compareTo(fish2);
+                } else {
+                    Map<String, Object> fish1 = (Map<String, Object>) o1.getValue();
+                    Map<String, Object> fish2 = (Map<String, Object>) o2.getValue();
+                    Long i1 = (Long) fish1.get(finalSortBy);
+                    Long i2 = (Long) fish2.get(finalSortBy);
+                    return i1.compareTo(i2);
+                }
             }
         });
 
         // put data from sorted list to hashmap (has to be a linked hashmap otherwise it will not be ordered)
-        HashMap<String, Object> temp = new LinkedHashMap<>();
+        map.clear();
         for (Map.Entry<String, Object> aa : list) {
-            temp.put(aa.getKey(), aa.getValue());
+            map.put(aa.getKey(), aa.getValue());
         }
-
-        return temp;
     }
 }
