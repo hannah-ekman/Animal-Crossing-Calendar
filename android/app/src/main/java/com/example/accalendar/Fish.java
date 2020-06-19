@@ -48,6 +48,7 @@ public class Fish extends AppCompatActivity {
     ExpandableListAdapter listAdapter;
     private FirebaseFirestore db;
     private Map<String, Object> fish = new LinkedHashMap<>();
+    private Map<String, Object> fishCopy = new LinkedHashMap<>();
     private ArrayList<Boolean> isNorth = new ArrayList<>();
     private Map<String, Object> caught = new HashMap<>();
     private static final String TAG = "fish";
@@ -208,6 +209,7 @@ public class Fish extends AppCompatActivity {
                         }
                         // then set this button to be selected
                         DocSnapToData.sortHashMapByIndex(fish, key);
+                        DocSnapToData.sortHashMapByIndex(fishCopy, key);
                         adapter.notifyDataSetChanged();
                         sort.put(key, true);
                         v.setBackground(getResources().getDrawable(R.drawable.fish_filter_on_button));
@@ -229,6 +231,7 @@ public class Fish extends AppCompatActivity {
         filterParent.add("Times");
         filterParent.add("Months");
         filterParent.add("Shadow Sizes");
+        filterParent.add("Caught");
 
         // Adding child data List one
         HashMap<String, Boolean> locations = new LinkedHashMap<>();
@@ -244,9 +247,12 @@ public class Fish extends AppCompatActivity {
 
         // Adding child data List two
         HashMap<String, Boolean> times = new LinkedHashMap<>();
-        times.put("All day", false);
+        times.put("All Day", false);
         times.put("4 AM - 9 PM", false);
+        times.put("9 AM - 4 PM", false);
+        times.put("4 PM - 9 AM", false);
         times.put("9 PM - 4 AM", false);
+
 
         // Adding child data List three
         HashMap<String, Boolean> months = new LinkedHashMap<>();
@@ -274,12 +280,18 @@ public class Fish extends AppCompatActivity {
         shadow.put("6 (Fin)", false);
         shadow.put("Narrow", false);
 
+        HashMap<String, Boolean> caughtFilter = new LinkedHashMap<>();
+        caughtFilter.put("Caught", false);
+        caughtFilter.put("Not Caught", false);
+
         filterChild.put(filterParent.get(0), locations); // Header, Child data
         filterChild.put(filterParent.get(1), times); // Header, Child data
         filterChild.put(filterParent.get(2), months); // Header, Child data
         filterChild.put(filterParent.get(3), shadow);
+        filterChild.put(filterParent.get(4), caughtFilter);
 
-        listAdapter = new ExpandableListAdapter(getApplicationContext(), filterParent, filterChild);
+        listAdapter = new ExpandableListAdapter(getApplicationContext(), filterParent, filterChild,
+                adapter, fish, isNorth, fishCopy, caught);
         list_view.setAdapter(listAdapter);
         NestedScrollView scroll = findViewById(R.id.fishScroll);
         setExpandableHeight(listAdapter, list_view, scroll); // set the height of the list view
@@ -296,6 +308,7 @@ public class Fish extends AppCompatActivity {
                         Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
                         fish.putAll(doc.getData());
                         DocSnapToData.sortHashMapByIndex(fish, "Default");
+                        fishCopy.putAll(fish);
                         adapter.notifyDataSetChanged();
                     } else {
                         Log.d(TAG, "No such document");

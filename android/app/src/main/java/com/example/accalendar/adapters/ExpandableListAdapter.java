@@ -17,6 +17,7 @@ import android.widget.Button;
 import android.widget.Filter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,12 +31,40 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private HashMap<String, HashMap<String, Boolean>> _listDataChild;
     private HashMap<Integer, View> views = new HashMap<>();
     private HashMap<Integer, View> groupViews = new HashMap<>();
+    private RecyclerviewAdapter adapter;
+    private Map<String, Object> fish;
+    private ArrayList<Boolean> isNorth;
+    private int filterCount = 0;
+    private Map<String, Object> fishCopy;
+    private Map<String, Object> caught;
+    private Map<String, Integer> monthInts = new HashMap<>();
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
-                                 HashMap<String, HashMap<String, Boolean>> listChildData) {
+                                 HashMap<String, HashMap<String, Boolean>> listChildData,
+                                 RecyclerviewAdapter adapter, Map<String, Object> fish, ArrayList<Boolean> isNorth,
+                                 Map<String, Object> fishCopy, Map<String, Object> caught) {
         this._context = context;
         this._listDataHeader = listDataHeader;
         this._listDataChild = listChildData;
+        this.adapter = adapter;
+        this.fish = fish;
+        this.isNorth = isNorth;
+        this.fishCopy = fishCopy;
+        this.caught = caught;
+
+        monthInts.put("JAN", 1);
+        monthInts.put("FEB", 2);
+        monthInts.put("MAR", 3);
+        monthInts.put("APR", 4);
+        monthInts.put("MAY", 5);
+        monthInts.put("JUN", 6);
+        monthInts.put("JUL", 7);
+        monthInts.put("AUG", 8);
+        monthInts.put("SEP", 9);
+        monthInts.put("OCT", 10);
+        monthInts.put("NOV", 11);
+        monthInts.put("DEC", 12);
+
     }
 
     @Override
@@ -59,7 +88,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         return 1;
     }
 
-    public View getChild(int groupPosition) {
+    public View getChild(final int groupPosition) {
         View convertView;
         final HashMap<String, Boolean> filters = (HashMap<String, Boolean>) getChild(groupPosition, 1);
         if (!views.containsKey(groupPosition)) {
@@ -108,10 +137,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         boolean tf = !filters.get(key);
                         filters.put(key, tf);
                         System.out.println(filters);
-                        if (tf)
+                        if (tf) {
                             v.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_on_button));
-                        else
+                            filterCount += 1;
+                            filter();
+                        }
+                        else {
                             v.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_off_button));
+                            filterCount -= 1;
+                            filter();
+                        }
                     }
                 });
                 listChild.addView(button);
@@ -120,6 +155,91 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         }
         return views.get(groupPosition);
+    }
+
+    private void filter() {
+        fish.clear();
+        if(filterCount == 0) {
+            fish.putAll(fishCopy);
+            adapter.notifyDataSetChanged();
+            return;
+        }
+        for(Map.Entry<String, Object> f : fishCopy.entrySet()) {
+            Map<String, Object> fishData = (Map<String, Object>) f.getValue();
+            boolean overallValid = true;
+            for(Map.Entry<String, HashMap<String, Boolean>> filterGroup : _listDataChild.entrySet()) {
+                String group = filterGroup.getKey();
+                String key;
+                if (group == "Locations")
+                    key = "location";
+                else if (group == "Times")
+                    key = "times";
+                else if (group == "Shadow Sizes")
+                    key = "shadow size";
+                else if (group == "Caught")
+                    key = "caught";
+                else {
+                    if (isNorth.get(0))
+                        key = "north";
+                    else
+                        key = "south";
+                }
+                Map<String, Boolean> filters = filterGroup.getValue();
+                boolean isValid = false;
+                boolean hasFilter = false;
+                for(Map.Entry<String, Boolean> filter : filters.entrySet()) {
+                    boolean tf = filter.getValue();
+                    String value = filter.getKey();
+                    if (tf) {
+                        hasFilter = true;
+                        if (key == "times" || key == "north" || key == "south") {
+                            ArrayList<Map<String, Long>> times = (ArrayList<Map<String, Long>>) fishData.get(key);
+                            for (int i = 0; i < times.size(); i++) {
+                                Map<String, Long> time = times.get(i);
+                                if (key == "north" || key == "south") { // this is a month
+                                    if (time.get("start") <= monthInts.get(value) && time.get("end") >= monthInts.get(value))
+                                        isValid = true;
+                                } else { // this is a time
+                                    if (value.equals("All Day")) {
+                                        if (time.get("start") == 0 && time.get("end") == 24)
+                                            isValid = true;
+                                    } else if (value.equals("4 AM - 9 PM")) {
+                                        if (time.get("start") == 4 && time.get("end") == 21)
+                                            isValid = true;
+                                    } else if (value.equals("4 PM - 9 AM")) {
+                                        if (time.get("start") == 16 && time.get("end") == 9)
+                                            isValid = true;
+                                    } else if (value.equals("9 AM - 4 PM")) {
+                                        if (time.get("start") == 9 && time.get("end") == 16)
+                                            isValid = true;
+                                    } else {
+                                        if (time.get("start") == 21 && time.get("end") == 4)
+                                            isValid = true;
+                                    }
+                                }
+                            }
+                        } else if (key == "caught") {
+                            boolean hasCaught = (boolean) caught.get(f.getKey());
+                            if(value.equals("Caught") && hasCaught)
+                                isValid = true;
+                            else if(value.equals("Not Caught") && !hasCaught)
+                                isValid = true;
+                        } else {
+                            String fishValue = (String) fishData.get(key);
+                            if (fishValue.equals(value))
+                                isValid = true;
+                        }
+                    }
+                }
+                if (!isValid && hasFilter){
+                    overallValid = false;
+                    break;
+                }
+            }
+            if (overallValid)
+                fish.put(f.getKey(), fishData);
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
