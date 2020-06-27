@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.accalendar.adapters.RecyclerviewAdapter;
+import com.example.accalendar.utils.ClassUtils;
 import com.example.accalendar.utils.DocSnapToData;
 import com.example.accalendar.views.FilterView;
 import com.google.android.flexbox.FlexboxLayout;
@@ -73,9 +74,7 @@ public class Fish extends AppCompatActivity {
         getFish();
         getUserInfo();
         recyclerView.setLayoutManager(new GridLayoutManager(this,  numColumns));
-        DocumentReference fishRef = db.collection("users").document(user.getUid())
-                .collection("fish").document("caught");
-        adapter = new RecyclerviewAdapter(this, fish, isNorth, caught, fishRef);
+        setAdapter();
         recyclerView.setAdapter(adapter);
 
         list_view = (ExpandableListView) findViewById(R.id.filter);
@@ -139,6 +138,27 @@ public class Fish extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    private void setAdapter() {
+        ArrayList<ClassUtils.IdKeyPair> idKeyPairs = new ArrayList<>();
+        idKeyPairs.add(new ClassUtils.IdKeyPair( R.id.cardtitle, "name", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair( R.id.fish_price_value, "price", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair( R.id.fish_shadow_value, "shadow size", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair( R.id.fish_location_value, "location", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair( R.id.fish_months, "months", ClassUtils.ViewType.MONTHVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair( R.id.fish_times, "times", ClassUtils.ViewType.TIMEVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair( R.id.checkbox_fish, "checkbox", ClassUtils.ViewType.CHECKBOX));
+
+        ClassUtils.PopupHelper helper = new ClassUtils.PopupHelper(idKeyPairs, R.layout.fish_popup,
+                R.drawable.caught_fish, R.drawable.missing_card, R.drawable.fishpopup, R.id.fishimg,
+                R.id.fishconstraint);
+
+
+        DocumentReference fishRef = db.collection("users").document(user.getUid())
+                .collection("fish").document("caught");
+        adapter = new RecyclerviewAdapter(this, fish, isNorth, caught, fishRef, ClassUtils.ItemType.FISH,
+                helper);
     }
 
     private void setExpandableHeight(ExpandableListAdapter mAdapter, ExpandableListView mExpandableListView, NestedScrollView scrollView) {

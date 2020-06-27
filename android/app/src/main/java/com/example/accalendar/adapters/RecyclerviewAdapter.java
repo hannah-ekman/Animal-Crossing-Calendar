@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.accalendar.R;
+import com.example.accalendar.utils.ClassUtils;
 import com.example.accalendar.views.MonthView;
 import com.example.accalendar.views.TimeView;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -40,23 +41,27 @@ import java.util.Map;
 
 public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapter.ViewHolder> {
     private static final String TAG = "Recyclerview";
-    private final Map<String, Object> fish;
+    private final Map<String, Object> items;
     private ArrayList<String> keys;
-    //populate this array with the r.drawable files
     private LayoutInflater mInflater;
     private final Context context;
     private final ArrayList<Boolean> isNorth;
     private DocumentReference docRef;
     private Map<String, Object> caught;
+    private final ClassUtils.ItemType itemType;
+    private final ClassUtils.PopupHelper helper;
 
     public RecyclerviewAdapter(Context context, Map<String, Object> fish, ArrayList<Boolean> isNorth,
-                                Map<String, Object> caught, DocumentReference docRef) {
+                                Map<String, Object> caught, DocumentReference docRef,
+                               ClassUtils.ItemType itemType, ClassUtils.PopupHelper helper) {
         this.mInflater = LayoutInflater.from(context);
-        this.fish = fish;
+        this.items = fish;
         this.context = context;
         this.isNorth = isNorth;
         this.caught = caught;
         this.docRef = docRef;
+        this.itemType = itemType;
+        this.helper = helper;
     }
 
     //inflates cell layout from xml
@@ -64,80 +69,73 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.recycler_view, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, helper.getImageView(), helper.getConstraintView());
     }
 
     //binds data to the ImageView to each cell
     //original post used textview, so I need to hammer this part out
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position){
-        this.keys = new ArrayList<>(fish.keySet());
+        this.keys = new ArrayList<>(items.keySet());
         final String name = keys.get(position);
-        final Map<String, Object> entry = (Map<String, Object>) fish.get(keys.get(position));
+        final Map<String, Object> entry = (Map<String, Object>) items.get(keys.get(position));
         String url = (String) entry.get("image");
         Picasso.get().setLoggingEnabled(true);
         //Picasso.get().load(url).into(holder.myImageView);
         Glide.with(holder.itemView.getContext()).load(url).into(holder.myImageView);
+
         ArrayList<Map<String, Long>> months;
-        final int[] timeBools = fillTimeBools((ArrayList<Map<String, Long>>) entry.get("times"));
-        if (isNorth.get(0)) {
-            months = ((ArrayList<Map<String, Long>>) entry.get("north"));
-        } else {
-            months = ((ArrayList<Map<String, Long>>) entry.get("south"));
+        int[] timeBools = null;
+        boolean[] monthBools = null;
+        //Only want to fill time/months if the type is fish or bug
+        if(itemType == ClassUtils.ItemType.FISH || itemType == ClassUtils.ItemType.BUG) {
+            timeBools = fillTimeBools((ArrayList<Map<String, Long>>) entry.get("times"));
+            if (isNorth.get(0)) {
+                months = ((ArrayList<Map<String, Long>>) entry.get("north"));
+            } else {
+                months = ((ArrayList<Map<String, Long>>) entry.get("south"));
+            }
+            monthBools = fillMonthBools(months);
         }
-        if (!caught.containsKey(name)) {
+
+        if (caught.containsKey(name) && (Boolean) caught.get(name)) {
+            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, helper.getCaughtId()));
+        } else {
             caught.put(name, false);
-            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.missing_card));
-        } else if ((Boolean) caught.get(name)) {
-            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.caught_fish));
-        } else {
-            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.missing_card));
+            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, helper.getNotCaughtId()));
         }
-        final boolean[] monthBools = fillMonthBools(months);
+
+        final int[] finalTimeBools = timeBools;
+        final boolean[] finalMonthBools = monthBools;
         holder.myImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // fill popup with corresponding fish info
                 Log.d(TAG, "onClick: clicked on: " + name);
-                View popView = mInflater.inflate(R.layout.fish_popup, null);
-                TextView fishName = popView.findViewById(R.id.cardtitle);
-                fishName.setText(name);
-                TextView price = popView.findViewById(R.id.fish_price_value);
-                price.setText(((Long) entry.get("price")).toString());
-                TextView shadow = popView.findViewById(R.id.fish_shadow_value);
-                shadow.setText((String) entry.get("shadow size"));
-                TextView location = popView.findViewById(R.id.fish_location_value);
-                location.setText((String) entry.get("location"));
-                MonthView monthInfo = popView.findViewById(R.id.fish_months);
-                monthInfo.setMonths(monthBools);
-                TimeView timeInfo = popView.findViewById(R.id.fish_times);
-                timeInfo.setTimes(timeBools);
-                CheckBox checkBox = popView.findViewById(R.id.checkbox_fish);
-                checkBox.setChecked((Boolean) caught.get(name));
-                checkBox.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        boolean isChecked = ((CheckBox) view).isChecked();
-                        Map<String, Object> checked = new HashMap<>();
-                        checked.put(name, isChecked);
-                        caught.put(name, isChecked);
-                        docRef.update(checked);
-                        if (isChecked) {
-                            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.caught_fish));
-                        } else {
-                            holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, R.drawable.missing_card));
-                        }
-                    }
-                });
-                popView.setBackground(ContextCompat.getDrawable(context, R.drawable.fishpopup));
-                DisplayMetrics metrics = context.getResources().getDisplayMetrics(); // used to convert px to dp
-                PopupWindow popWindow = new PopupWindow(popView, (int) (metrics.density*325+0.5f),
-                        (int) (metrics.density*350+0.5f), true);
-                if (Build.VERSION.SDK_INT >= 21) {
-                    popWindow.setElevation(5.0f);
+
+                ArrayList<ClassUtils.IdKeyPair> idKeyPairs = helper.getIdKeyPairs();
+
+                // fill values for each view we are inflating
+                HashMap<String, Object> keyValuePairs = new HashMap<>();
+                for (int i = 0; i < idKeyPairs.size(); i++) {
+                    ClassUtils.IdKeyPair idKeyPair = idKeyPairs.get(i);
+                    String key = idKeyPair.getKey();
+                    if (key.equals("name"))
+                        keyValuePairs.put(key, name);
+                    else if (key.equals("checkbox"))
+                        keyValuePairs.put(key, caught.get(name));
+                    else if (key.equals("months"))
+                        keyValuePairs.put(key, finalMonthBools);
+                    else if (key.equals("times"))
+                        keyValuePairs.put(key, finalTimeBools);
+                    else if (key.equals("price"))
+                        keyValuePairs.put(key, ((Long) entry.get(key)).toString());
+                    else
+                        keyValuePairs.put(idKeyPair.getKey(), entry.get(idKeyPair.getKey()));
                 }
-                popWindow.setAnimationStyle(R.style.PopUpWindow_Animation);
-                popWindow.showAtLocation(popView, Gravity.CENTER, 0, 0);
+
+                // pass to the helper to handle the inflate for us
+                helper.fillViews(mInflater, keyValuePairs, caught, docRef, holder, context);
             }
         });
 
@@ -192,19 +190,19 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     // We have to define getItemCount since it's abstract
     @Override
     public int getItemCount(){
-        return fish.size();
+        return items.size();
     }
 
     //supposed to store and recycle view as it is scrolled off screen
     //implements ViewHolder stuff so it doesn't show up as an error
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView myImageView;
-        ConstraintLayout myConstraintLayout;
+        public ConstraintLayout myConstraintLayout;
 
-        ViewHolder(View itemView){
+        ViewHolder(View itemView, int imageView, int constraintView){
             super(itemView);
-            myImageView = itemView.findViewById(R.id.fishimg);
-            myConstraintLayout = itemView.findViewById(R.id.fishconstraint);
+            myImageView = itemView.findViewById(imageView);
+            myConstraintLayout = itemView.findViewById(constraintView);
             //itemView.setOnClickListener(this);
         }
     }
