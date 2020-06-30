@@ -1,33 +1,47 @@
 package com.example.accalendar;
 
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.GravityCompat;
 import androidx.core.widget.NestedScrollView;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.accalendar.adapters.RecyclerviewAdapter;
 import com.example.accalendar.utils.ClassUtils;
 import com.example.accalendar.utils.DocSnapToData;
 import com.example.accalendar.views.FilterView;
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -42,8 +56,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import com.example.accalendar.adapters.ExpandableListAdapter;
+import com.example.accalendar.adapters.RecyclerviewAdapter;
 
-public class Fish extends AppCompatActivity {
+public class Fish extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     RecyclerviewAdapter adapter;
     ExpandableListAdapter listAdapter;
@@ -60,6 +76,8 @@ public class Fish extends AppCompatActivity {
     HashMap<String, HashMap<String, Boolean>> filterChild;
     HashMap<String, Boolean> sort;
     ArrayList<Button> sortButtons = new ArrayList<>();
+    private GoogleSignInClient mGoogleSignInClient;
+    private boolean isVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -76,6 +94,38 @@ public class Fish extends AppCompatActivity {
         recyclerView.setLayoutManager(new GridLayoutManager(this,  numColumns));
         setAdapter();
         recyclerView.setAdapter(adapter);
+        GoogleSignInOptions gso =
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestEmail()
+                        .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        final EditText editText = findViewById(R.id.search);
+        editText.setSingleLine();
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                switch (actionId){
+                    case EditorInfo.IME_ACTION_DONE:
+                    case EditorInfo.IME_ACTION_NEXT:
+                    case EditorInfo.IME_ACTION_PREVIOUS:
+                        System.out.println("searching");
+                        listAdapter.search(editText.getText().toString());
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        setSupportActionBar(toolbar);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView.setNavigationItemSelectedListener(this);
 
         list_view = (ExpandableListView) findViewById(R.id.filter);
         createListData();
@@ -136,6 +186,20 @@ public class Fish extends AppCompatActivity {
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
                 return false;
+            }
+        });
+
+        ImageButton filterButton = findViewById(R.id.imageButton);
+        filterButton.setOnClickListener(new ImageButton.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View filter = findViewById(R.id.filterView);
+                isVisible = !isVisible;
+                if (isVisible) {
+                    filter.setVisibility(View.VISIBLE);
+                } else {
+                    filter.setVisibility(View.GONE);
+                }
             }
         });
     }
@@ -379,6 +443,72 @@ public class Fish extends AppCompatActivity {
             }
         });
 
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_home) {
+            // Handle the camera action
+        } else if (id == R.id.nav_bug) {
+
+        } else if (id == R.id.nav_fish) {
+            Intent intent = new Intent(this, Fish.class);
+            startActivity(intent);
+        }else if (id == R.id.nav_fossil) {
+
+        } else if (id == R.id.nav_signout) {
+            signOut();
+        } else if (id == R.id.nav_send) {
+
+        }
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void signOut() {
+        System.out.println("singing out");
+        mGoogleSignInClient.signOut()
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Log.w(TAG, "Logged out");
+                        Intent intent = new Intent(Fish.this,
+                                MainActivity.class);
+                        startActivity(intent);
+                        FirebaseAuth.getInstance().signOut();
+                    }
+                });
     }
 
     /*

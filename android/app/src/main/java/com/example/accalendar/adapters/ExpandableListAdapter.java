@@ -38,6 +38,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Map<String, Object> fishCopy;
     private Map<String, Object> caught;
     private Map<String, Integer> monthInts = new HashMap<>();
+    private String query = "";
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, HashMap<String, Boolean>> listChildData,
@@ -159,87 +160,107 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private void filter() {
         fish.clear();
+        System.out.println(query);
         if(filterCount == 0) {
-            fish.putAll(fishCopy);
+            if (query.equals("")) {
+                fish.putAll(fishCopy);
+            } else {
+                for (Map.Entry<String, Object> f : fishCopy.entrySet()) {
+                    String fishName = f.getKey();
+                    System.out.println(fishName.toLowerCase().contains(query));
+                    if(fishName.contains(query)) {
+                        fish.put(fishName, f.getValue());
+                    }
+                }
+            }
             adapter.notifyDataSetChanged();
             return;
         }
         for(Map.Entry<String, Object> f : fishCopy.entrySet()) {
             Map<String, Object> fishData = (Map<String, Object>) f.getValue();
+            String fishName = f.getKey();
+            fishName = fishName.toLowerCase();
             boolean overallValid = true;
-            for(Map.Entry<String, HashMap<String, Boolean>> filterGroup : _listDataChild.entrySet()) {
-                String group = filterGroup.getKey();
-                String key;
-                if (group == "Locations")
-                    key = "location";
-                else if (group == "Times")
-                    key = "times";
-                else if (group == "Shadow Sizes")
-                    key = "shadow size";
-                else if (group == "Caught")
-                    key = "caught";
-                else {
-                    if (isNorth.get(0))
-                        key = "north";
-                    else
-                        key = "south";
-                }
-                Map<String, Boolean> filters = filterGroup.getValue();
-                boolean isValid = false;
-                boolean hasFilter = false;
-                for(Map.Entry<String, Boolean> filter : filters.entrySet()) {
-                    boolean tf = filter.getValue();
-                    String value = filter.getKey();
-                    if (tf) {
-                        hasFilter = true;
-                        if (key == "times" || key == "north" || key == "south") {
-                            ArrayList<Map<String, Long>> times = (ArrayList<Map<String, Long>>) fishData.get(key);
-                            for (int i = 0; i < times.size(); i++) {
-                                Map<String, Long> time = times.get(i);
-                                if (key == "north" || key == "south") { // this is a month
-                                    if (time.get("start") <= monthInts.get(value) && time.get("end") >= monthInts.get(value))
-                                        isValid = true;
-                                } else { // this is a time
-                                    if (value.equals("All Day")) {
-                                        if (time.get("start") == 0 && time.get("end") == 24)
+            if(fishName.contains(query)){
+                for(Map.Entry<String, HashMap<String, Boolean>> filterGroup : _listDataChild.entrySet()) {
+                    String group = filterGroup.getKey();
+                    String key;
+                    if (group == "Locations")
+                        key = "location";
+                    else if (group == "Times")
+                        key = "times";
+                    else if (group == "Shadow Sizes")
+                        key = "shadow size";
+                    else if (group == "Caught")
+                        key = "caught";
+                    else {
+                        if (isNorth.get(0))
+                            key = "north";
+                        else
+                            key = "south";
+                    }
+                    Map<String, Boolean> filters = filterGroup.getValue();
+                    boolean isValid = false;
+                    boolean hasFilter = false;
+                    for(Map.Entry<String, Boolean> filter : filters.entrySet()) {
+                        boolean tf = filter.getValue();
+                        String value = filter.getKey();
+                        if (tf) {
+                            hasFilter = true;
+                            if (key == "times" || key == "north" || key == "south") {
+                                ArrayList<Map<String, Long>> times = (ArrayList<Map<String, Long>>) fishData.get(key);
+                                for (int i = 0; i < times.size(); i++) {
+                                    Map<String, Long> time = times.get(i);
+                                    if (key == "north" || key == "south") { // this is a month
+                                        if (time.get("start") <= monthInts.get(value) && time.get("end") >= monthInts.get(value))
                                             isValid = true;
-                                    } else if (value.equals("4 AM - 9 PM")) {
-                                        if (time.get("start") == 4 && time.get("end") == 21)
-                                            isValid = true;
-                                    } else if (value.equals("4 PM - 9 AM")) {
-                                        if (time.get("start") == 16 && time.get("end") == 9)
-                                            isValid = true;
-                                    } else if (value.equals("9 AM - 4 PM")) {
-                                        if (time.get("start") == 9 && time.get("end") == 16)
-                                            isValid = true;
-                                    } else {
-                                        if (time.get("start") == 21 && time.get("end") == 4)
-                                            isValid = true;
+                                    } else { // this is a time
+                                        if (value.equals("All Day")) {
+                                            if (time.get("start") == 0 && time.get("end") == 24)
+                                                isValid = true;
+                                        } else if (value.equals("4 AM - 9 PM")) {
+                                            if (time.get("start") == 4 && time.get("end") == 21)
+                                                isValid = true;
+                                        } else if (value.equals("4 PM - 9 AM")) {
+                                            if (time.get("start") == 16 && time.get("end") == 9)
+                                                isValid = true;
+                                        } else if (value.equals("9 AM - 4 PM")) {
+                                            if (time.get("start") == 9 && time.get("end") == 16)
+                                                isValid = true;
+                                        } else {
+                                            if (time.get("start") == 21 && time.get("end") == 4)
+                                                isValid = true;
+                                        }
                                     }
                                 }
+                            } else if (key == "caught") {
+                                boolean hasCaught = (boolean) caught.get(f.getKey());
+                                if(value.equals("Caught") && hasCaught)
+                                    isValid = true;
+                                else if(value.equals("Not Caught") && !hasCaught)
+                                    isValid = true;
+                            } else {
+                                String fishValue = (String) fishData.get(key);
+                                if (fishValue.equals(value))
+                                    isValid = true;
                             }
-                        } else if (key == "caught") {
-                            boolean hasCaught = (boolean) caught.get(f.getKey());
-                            if(value.equals("Caught") && hasCaught)
-                                isValid = true;
-                            else if(value.equals("Not Caught") && !hasCaught)
-                                isValid = true;
-                        } else {
-                            String fishValue = (String) fishData.get(key);
-                            if (fishValue.equals(value))
-                                isValid = true;
                         }
                     }
+                    if (!isValid && hasFilter){
+                        overallValid = false;
+                        break;
+                    }
                 }
-                if (!isValid && hasFilter){
-                    overallValid = false;
-                    break;
-                }
+                if (overallValid)
+                    fish.put(f.getKey(), fishData);
             }
-            if (overallValid)
-                fish.put(f.getKey(), fishData);
         }
         adapter.notifyDataSetChanged();
+    }
+
+    public void search(String query) {
+        this.query = query.toLowerCase();
+        filter();
     }
 
     @Override

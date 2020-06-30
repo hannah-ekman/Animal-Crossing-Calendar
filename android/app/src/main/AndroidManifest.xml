@@ -32,7 +32,8 @@
             android:noHistory="true"/>
         <activity android:name=".Fish"
             android:label="Fish Tracker"
-            android:noHistory="true"/>
+            android:noHistory="true"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".NewProfile"
             android:label="New Profile"
             android:noHistory="true"/>
