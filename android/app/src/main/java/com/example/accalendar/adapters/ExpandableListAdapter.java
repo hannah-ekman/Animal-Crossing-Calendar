@@ -234,11 +234,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                     }
                                 }
                             } else if (key == "caught") {
-                                boolean hasCaught = (boolean) caught.get(f.getKey());
-                                if(value.equals("Caught") && hasCaught)
-                                    isValid = true;
-                                else if(value.equals("Not Caught") && !hasCaught)
-                                    isValid = true;
+                                if(caught.containsKey(f.getKey())) {
+                                    boolean hasCaught = (boolean) caught.get(f.getKey());
+                                    if (value.equals("Caught") && hasCaught)
+                                        isValid = true;
+                                    else if (value.equals("Not Caught") && !hasCaught)
+                                        isValid = true;
+                                }
                             } else {
                                 String fishValue = (String) fishData.get(key);
                                 if (fishValue.equals(value))

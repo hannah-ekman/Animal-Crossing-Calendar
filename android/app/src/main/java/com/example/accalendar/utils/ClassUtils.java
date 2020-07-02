@@ -1,11 +1,15 @@
 package com.example.accalendar.utils;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -150,13 +154,47 @@ public class ClassUtils {
             }
             popView.setBackground(ContextCompat.getDrawable(context, mainViewBg));
             DisplayMetrics metrics = context.getResources().getDisplayMetrics(); // used to convert px to dp
-            PopupWindow popWindow = new PopupWindow(popView, (int) (metrics.density*325+0.5f),
-                    (int) (metrics.density*350+0.5f), true);
+            PopupWindow popWindow = new PopupWindow(popView, metrics.widthPixels,
+                    ViewGroup.LayoutParams.WRAP_CONTENT, true);
             if (Build.VERSION.SDK_INT >= 21) {
                 popWindow.setElevation(5.0f);
             }
             popWindow.setAnimationStyle(R.style.PopUpWindow_Animation);
             popWindow.showAtLocation(popView, Gravity.CENTER, 0, 0);
         }
+    }
+
+    public abstract static class RightDrawableOnTouchListener implements View.OnTouchListener {
+        Drawable drawable;
+        private int fuzz = 10;
+
+        public RightDrawableOnTouchListener(TextView view) {
+            super();
+            final Drawable[] drawables = view.getCompoundDrawables();
+            if (drawables != null && drawables.length == 4)
+                this.drawable = drawables[2];
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see android.view.View.OnTouchListener#onTouch(android.view.View, android.view.MotionEvent)
+         */
+        @Override
+        public boolean onTouch(final View v, final MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN && drawable != null) {
+                final int x = (int) event.getX();
+                final int y = (int) event.getY();
+                final Rect bounds = drawable.getBounds();
+                if (x >= (v.getRight() - bounds.width() - fuzz) && x <= (v.getRight() - v.getPaddingRight() + fuzz)
+                        && y >= (v.getPaddingTop() - fuzz) && y <= (v.getHeight() - v.getPaddingBottom()) + fuzz) {
+                    return onDrawableTouch(event);
+                }
+            }
+            return false;
+        }
+
+        public abstract boolean onDrawableTouch(final MotionEvent event);
+
     }
 }
