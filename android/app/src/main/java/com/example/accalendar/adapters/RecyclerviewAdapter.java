@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -47,19 +48,24 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     private final Context context;
     private final ArrayList<Boolean> isNorth;
     private DocumentReference docRef;
+    private DocumentReference donatedRef;
     private Map<String, Object> caught;
     private final ClassUtils.ItemType itemType;
     private final ClassUtils.PopupHelper helper;
+    private Map<String, Object> donated;
 
     public RecyclerviewAdapter(Context context, Map<String, Object> fish, ArrayList<Boolean> isNorth,
-                                Map<String, Object> caught, DocumentReference docRef,
-                               ClassUtils.ItemType itemType, ClassUtils.PopupHelper helper) {
+                                Map<String, Object> caught,  DocumentReference docRef,
+                               ClassUtils.ItemType itemType, ClassUtils.PopupHelper helper,
+                               Map<String, Object> donated, DocumentReference donatedRef) {
         this.mInflater = LayoutInflater.from(context);
         this.items = fish;
         this.context = context;
         this.isNorth = isNorth;
         this.caught = caught;
+        this.donated = donated;
         this.docRef = docRef;
+        this.donatedRef = donatedRef;
         this.itemType = itemType;
         this.helper = helper;
     }
@@ -69,7 +75,7 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     @NonNull
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.recycler_view, parent, false);
-        return new ViewHolder(view, helper.getImageView(), helper.getConstraintView());
+        return new ViewHolder(view, helper.getImageView(), helper.getConstraintView(), helper.getDonatedId());
     }
 
     //binds data to the ImageView to each cell
@@ -105,6 +111,13 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
             holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, helper.getNotCaughtId()));
         }
 
+        if (donated.containsKey(name) && (Boolean) donated.get(name)) {
+            holder.donatedView.setImageResource(helper.getDonatedIcon());
+        } else {
+            donated.put(name, false);
+            holder.donatedView.setImageResource(0);
+        }
+
         final int[] finalTimeBools = timeBools;
         final boolean[] finalMonthBools = monthBools;
         holder.myImageView.setOnClickListener(new View.OnClickListener() {
@@ -124,6 +137,8 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
                         keyValuePairs.put(key, name);
                     else if (key.equals("checkbox"))
                         keyValuePairs.put(key, caught.get(name));
+                    else if (key.equals("donated"))
+                        keyValuePairs.put(key, donated.get(name));
                     else if (key.equals("months"))
                         keyValuePairs.put(key, finalMonthBools);
                     else if (key.equals("times"))
@@ -135,7 +150,7 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
                 }
 
                 // pass to the helper to handle the inflate for us
-                helper.fillViews(mInflater, keyValuePairs, caught, docRef, holder, context);
+                helper.fillViews(mInflater, keyValuePairs, caught, docRef, holder, context, donatedRef, donated);
             }
         });
 
@@ -197,11 +212,13 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     //implements ViewHolder stuff so it doesn't show up as an error
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView myImageView;
-        public ConstraintLayout myConstraintLayout;
+        public ImageView donatedView;
+        public FrameLayout myConstraintLayout;
 
-        ViewHolder(View itemView, int imageView, int constraintView){
+        ViewHolder(View itemView, int imageView, int constraintView, int donatedView){
             super(itemView);
             myImageView = itemView.findViewById(imageView);
+            this.donatedView = itemView.findViewById(donatedView);
             myConstraintLayout = itemView.findViewById(constraintView);
             //itemView.setOnClickListener(this);
         }

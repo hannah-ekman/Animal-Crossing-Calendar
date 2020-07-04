@@ -4,6 +4,7 @@ package com.example.accalendar;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -21,6 +22,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -81,6 +83,7 @@ public class Fish extends AppCompatActivity
     private Map<String, Object> fishCopy = new LinkedHashMap<>();
     private ArrayList<Boolean> isNorth = new ArrayList<>();
     private Map<String, Object> caught = new HashMap<>();
+    private Map<String, Object> donated = new HashMap<>();
     private static final String TAG = "fish";
     private FirebaseAuth mAuth;
     private FirebaseUser user;
@@ -92,6 +95,7 @@ public class Fish extends AppCompatActivity
     private GoogleSignInClient mGoogleSignInClient;
     private int listHeight = 0;
     Drawable search;
+    private HashMap<String, Boolean> locations, shadow, times, months, caughtFilter;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -117,6 +121,16 @@ public class Fish extends AppCompatActivity
 
         final EditText editText = findViewById(R.id.search);
         editText.setSingleLine();
+        // hide the keyboard when the view loses focus (user taps outside of edittext field
+        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                System.out.println(hasFocus);
+                if (!hasFocus) {
+                    hideKeyboard(v);
+                }
+            }
+        });
         editText.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {
@@ -156,6 +170,25 @@ public class Fish extends AppCompatActivity
                 setListViewListeners();
             }
         });
+    }
+
+    // mark the edittext view as unfocused if it was focused and the user tapped outside of it
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if ( v instanceof EditText) {
+                Rect outRect = new Rect();
+                v.getGlobalVisibleRect(outRect);
+                if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    Log.d("focus", "touchevent");
+                    v.clearFocus();
+                    InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 
     private void setListViewListeners() {
@@ -213,10 +246,35 @@ public class Fish extends AppCompatActivity
         list_view = (ExpandableListView) popView.findViewById(R.id.filter);
 
         Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin_sans_semibold.ttf");
-        TextView filter = popView.findViewById(R.id.filterby);
+        TextView filter = popView.findViewById(R.id.filterbytext);
         filter.setTypeface(typeface);
         TextView sort = popView.findViewById(R.id.sortby);
         sort.setTypeface(typeface);
+        Button clear = popView.findViewById(R.id.clearfish);
+        //adjust button size to match the filter buttons' sizes
+        clear.setMinHeight(0);
+        int px = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                51,
+                getResources().getDisplayMetrics()
+        );
+        clear.setMinWidth(px);
+        clear.setMinimumWidth(px);
+        clear.setMinimumHeight(0);
+        clear.setTypeface(typeface);
+        px = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                10,
+                getResources().getDisplayMetrics()
+        );
+        clear.setPadding(px, px, px, px);
+        clear.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setFilters();
+                listAdapter.clear();
+                listAdapter.filter();
+            }
+        });
         createListData(popView);
         createSortButtons(popView);
         popView.setBackground(ContextCompat.getDrawable(getApplicationContext(), R.drawable.whiterectangle));
@@ -261,17 +319,22 @@ public class Fish extends AppCompatActivity
         idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_location_value, "location", ClassUtils.ViewType.TEXTVIEW));
         idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_months, "months", ClassUtils.ViewType.MONTHVIEW));
         idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_times, "times", ClassUtils.ViewType.TIMEVIEW));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.checkbox_fish, "checkbox", ClassUtils.ViewType.CHECKBOX));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.donatedfish, "donated",
+                ClassUtils.ViewType.DONATEDBUTTON, R.drawable.ic_museumicon, R.drawable.ic_whitemuseumicon));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.caughtfish, "checkbox",
+                ClassUtils.ViewType.CAUGHTBUTTON, R.drawable.ic_fishingicon, R.drawable.ic_whitefishingicon));
 
         ClassUtils.PopupHelper helper = new ClassUtils.PopupHelper(idKeyPairs, R.layout.fish_popup,
                 R.drawable.caught_fish, R.drawable.missing_card, R.drawable.fishpopup, R.id.fishimg,
-                R.id.fishconstraint);
+                R.id.fishconstraint, R.id.fishdonated, R.drawable.caught);
 
 
         DocumentReference fishRef = db.collection("users").document(user.getUid())
                 .collection("fish").document("caught");
+        DocumentReference donatedRef = db.collection("users").document(user.getUid())
+                .collection("fish").document("donated");
         adapter = new RecyclerviewAdapter(this, fish, isNorth, caught, fishRef, ClassUtils.ItemType.FISH,
-                helper);
+                helper, donated, donatedRef);
     }
 
     private void setExpandableHeight(ExpandableListAdapter mAdapter, ExpandableListView mExpandableListView) {
@@ -354,6 +417,62 @@ public class Fish extends AppCompatActivity
         }
     }
 
+    private void setFilters() {
+        // Adding child data List one
+        locations.put("Pier", false);
+        locations.put("Pond", false);
+        locations.put("River", false);
+        locations.put("River (Clifftop)", false);
+        locations.put("River (Clifftop) Pond", false);
+        locations.put("River (Mouth)", false);
+        locations.put("Sea", false);
+        locations.put("Sea (Raining)", false);
+
+
+        // Adding child data List two
+        times.put("All Day", false);
+        times.put("4 AM - 9 PM", false);
+        times.put("9 AM - 4 PM", false);
+        times.put("4 PM - 9 AM", false);
+        times.put("9 PM - 4 AM", false);
+
+
+        // Adding child data List three
+        months.put("JAN", false);
+        months.put("FEB", false);
+        months.put("MAR", false);
+        months.put("APR", false);
+        months.put("MAY", false);
+        months.put("JUN", false);
+        months.put("JUL", false);
+        months.put("AUG", false);
+        months.put("SEP", false);
+        months.put("OCT", false);
+        months.put("NOV", false);
+        months.put("DEC", false);
+
+        // Adding child data for shadow size
+        shadow.put("1", false);
+        shadow.put("2", false);
+        shadow.put("3", false);
+        shadow.put("4", false);
+        shadow.put("5", false);
+        shadow.put("6", false);
+        shadow.put("6 (Fin)", false);
+        shadow.put("Narrow", false);
+
+        caughtFilter.put("Caught", false);
+        caughtFilter.put("Not Caught", false);
+        caughtFilter.put("Donated", false);
+        caughtFilter.put("Not Donated", false);
+
+        filterChild.put(filterParent.get(0), locations); // Header, Child data
+        filterChild.put(filterParent.get(1), times); // Header, Child data
+        filterChild.put(filterParent.get(2), months); // Header, Child data
+        filterChild.put(filterParent.get(3), shadow);
+        filterChild.put(filterParent.get(4), caughtFilter);
+    }
+
     private void createListData(View v) {
         // check if we have created the adapter already so we don't overwrite the state
         if (listAdapter == null) {
@@ -365,72 +484,24 @@ public class Fish extends AppCompatActivity
             filterParent.add("Times");
             filterParent.add("Months");
             filterParent.add("Shadow Sizes");
-            filterParent.add("Caught");
+            filterParent.add("Blathers");
 
-            // Adding child data List one
-            HashMap<String, Boolean> locations = new LinkedHashMap<>();
-            locations.put("Pier", false);
-            locations.put("Pond", false);
-            locations.put("River", false);
-            locations.put("River (Clifftop)", false);
-            locations.put("River (Clifftop) Pond", false);
-            locations.put("River (Mouth)", false);
-            locations.put("Sea", false);
-            locations.put("Sea (Raining)", false);
+            locations = new LinkedHashMap<>();
+            times = new LinkedHashMap<>();
+            months = new LinkedHashMap<>();
+            shadow = new LinkedHashMap<>();
+            caughtFilter = new LinkedHashMap<>();
 
-
-            // Adding child data List two
-            HashMap<String, Boolean> times = new LinkedHashMap<>();
-            times.put("All Day", false);
-            times.put("4 AM - 9 PM", false);
-            times.put("9 AM - 4 PM", false);
-            times.put("4 PM - 9 AM", false);
-            times.put("9 PM - 4 AM", false);
-
-
-            // Adding child data List three
-            HashMap<String, Boolean> months = new LinkedHashMap<>();
-            months.put("JAN", false);
-            months.put("FEB", false);
-            months.put("MAR", false);
-            months.put("APR", false);
-            months.put("MAY", false);
-            months.put("JUN", false);
-            months.put("JUL", false);
-            months.put("AUG", false);
-            months.put("SEP", false);
-            months.put("OCT", false);
-            months.put("NOV", false);
-            months.put("DEC", false);
-
-            // Adding child data for shadow size
-            HashMap<String, Boolean> shadow = new LinkedHashMap<>();
-            shadow.put("1", false);
-            shadow.put("2", false);
-            shadow.put("3", false);
-            shadow.put("4", false);
-            shadow.put("5", false);
-            shadow.put("6", false);
-            shadow.put("6 (Fin)", false);
-            shadow.put("Narrow", false);
-
-            HashMap<String, Boolean> caughtFilter = new LinkedHashMap<>();
-            caughtFilter.put("Caught", false);
-            caughtFilter.put("Not Caught", false);
-
-            filterChild.put(filterParent.get(0), locations); // Header, Child data
-            filterChild.put(filterParent.get(1), times); // Header, Child data
-            filterChild.put(filterParent.get(2), months); // Header, Child data
-            filterChild.put(filterParent.get(3), shadow);
-            filterChild.put(filterParent.get(4), caughtFilter);
+            setFilters();
 
             listAdapter = new ExpandableListAdapter(getApplicationContext(), filterParent, filterChild,
-                    adapter, fish, isNorth, fishCopy, caught);
+                    adapter, fish, isNorth, fishCopy, caught, donated);
         }
         if (listHeight <= 0 && v != null ) {
             setExpandableHeight(listAdapter, list_view); // set the height of the list view
         }
         if (v != null) {
+
             list_view.setAdapter(listAdapter);
 
             NestedScrollView scroll = v.findViewById(R.id.fishScroll);
@@ -503,7 +574,30 @@ public class Fish extends AppCompatActivity
                 }
             }
         });
+        final DocumentReference donatedRef = db.collection("users").document(user.getUid())
+                .collection("fish").document("donated");
+        donatedRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
+                        donated.putAll(doc.getData());
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        donatedRef.set(new HashMap<>());
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
 
+    private void hideKeyboard(View view) {
+        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Fish.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
 
@@ -539,12 +633,12 @@ public class Fish extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
+            Intent intent = new Intent(this, CalendarActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_bug) {
 
         } else if (id == R.id.nav_fish) {
-            Intent intent = new Intent(this, Fish.class);
-            startActivity(intent);
+
         } else if (id == R.id.nav_fossil) {
 
         } else if (id == R.id.nav_signout) {

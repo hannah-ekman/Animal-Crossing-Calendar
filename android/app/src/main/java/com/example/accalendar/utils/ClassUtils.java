@@ -11,10 +11,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.example.accalendar.R;
 import com.example.accalendar.adapters.RecyclerviewAdapter;
@@ -32,7 +34,7 @@ public class ClassUtils {
     }
 
     public enum ViewType {
-        TEXTVIEW, MONTHVIEW, TIMEVIEW, CHECKBOX
+        TEXTVIEW, MONTHVIEW, TIMEVIEW, DONATEDBUTTON, CAUGHTBUTTON
     }
 
     // holds the id of the view, the key for the view (used to match to the value of the view), and the type of view
@@ -40,6 +42,16 @@ public class ClassUtils {
         final int id;
         final String key;
         final ViewType type;
+        int selectedBG;
+        int unselectedBG;
+        public IdKeyPair(int id, String key, ViewType type, int selectedBG, int unselectedBG) {
+            this.id = id;
+            this.key = key;
+            this.type = type;
+            this.selectedBG = selectedBG;
+            this.unselectedBG = unselectedBG;
+        }
+
         public IdKeyPair(int id, String key, ViewType type) {
             this.id = id;
             this.key = key;
@@ -57,6 +69,14 @@ public class ClassUtils {
         public ViewType getType() {
             return type;
         }
+
+        public int getSelectedBG() {
+            return selectedBG;
+        }
+
+        public int getUnselectedBG() {
+            return unselectedBG;
+        }
     }
 
     // handles inflating the popup and contains other useful info for the recyclerview
@@ -69,9 +89,11 @@ public class ClassUtils {
         final int mainViewBg;
         final int imageView;
         final int constraintView;
+        int donatedId;
+        int donatedIcon;
 
         public PopupHelper(ArrayList<IdKeyPair> idKeyPairs, int mainView, int caughtId, int notCaughtId,
-                           int mainViewBg, int imageView, int constraintView) {
+                           int mainViewBg, int imageView, int constraintView, int donatedId, int donatedIcon) {
             this.idKeyPairs = idKeyPairs;
             this.mainView = mainView;
             this.caughtId = caughtId;
@@ -79,6 +101,8 @@ public class ClassUtils {
             this.mainViewBg = mainViewBg;
             this.imageView = imageView;
             this.constraintView = constraintView;
+            this.donatedId = donatedId;
+            this.donatedIcon = donatedIcon;
         }
 
         public ArrayList<IdKeyPair> getIdKeyPairs() {
@@ -101,14 +125,23 @@ public class ClassUtils {
             return notCaughtId;
         }
 
+        public int getDonatedId() {
+            return donatedId;
+        }
+
+        public int getDonatedIcon() {
+            return donatedIcon;
+        }
+
         // inflates the popup and fills the views
         public void fillViews(LayoutInflater mInflater, final HashMap<String, Object> keyValuePairs,
                               final Map<String, Object> caught, final DocumentReference docRef,
-                              final RecyclerviewAdapter.ViewHolder holder, final Context context) {
+                              final RecyclerviewAdapter.ViewHolder holder, final Context context,
+                              final DocumentReference donatedRef, final Map<String, Object> donated) {
             View popView = mInflater.inflate(mainView, null);
             // go through each id we need to fill
             for(int i = 0; i < idKeyPairs.size(); i++) {
-                IdKeyPair idKeyPair = idKeyPairs.get(i);
+                final IdKeyPair idKeyPair = idKeyPairs.get(i);
                 // get the corresponding value for the current key
                 Object value = keyValuePairs.get(idKeyPair.getKey());
                 int viewId = idKeyPair.getId();
@@ -127,22 +160,70 @@ public class ClassUtils {
                         TimeView times = popView.findViewById(viewId);
                         times.setTimes((int[]) value);
                         break;
-                    case CHECKBOX:
-                        CheckBox checkBox = popView.findViewById(viewId);
-                        checkBox.setChecked((Boolean) value);
-                        checkBox.setOnClickListener(new View.OnClickListener() {
+                    case CAUGHTBUTTON:
+                        final ImageButton button = popView.findViewById(viewId);
+                        if ((Boolean) value) {
+                            Drawable d = ResourcesCompat.getDrawable(
+                                    context.getResources(), idKeyPair.getSelectedBG(), null);
+                            button.setBackground(d);
+                        } else {
+                            Drawable d = ResourcesCompat.getDrawable(
+                                    context.getResources(), idKeyPair.getUnselectedBG(), null);
+                            button.setBackground(d);
+                        }
+                        button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 String name = (String) keyValuePairs.get("name");
-                                boolean isChecked = ((CheckBox) view).isChecked();
                                 Map<String, Object> checked = new HashMap<>();
-                                checked.put(name, isChecked);
+                                boolean isChecked = !(Boolean) caught.get(name);
                                 caught.put(name, isChecked);
+                                checked.put(name, isChecked);
                                 docRef.update(checked);
                                 if (isChecked) {
                                     holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, caughtId));
+                                    Drawable d = ResourcesCompat.getDrawable(
+                                            context.getResources(), idKeyPair.getSelectedBG(), null);
+                                    view.setBackground(d);
                                 } else {
                                     holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, notCaughtId));
+                                    Drawable d = ResourcesCompat.getDrawable(
+                                            context.getResources(), idKeyPair.getUnselectedBG(), null);
+                                    view.setBackground(d);
+                                }
+                            }
+                        });
+                        break;
+                    case DONATEDBUTTON:
+                        final ImageButton donateButton = popView.findViewById(viewId);
+                        if ((Boolean) value) {
+                            Drawable d = ResourcesCompat.getDrawable(
+                                    context.getResources(), idKeyPair.getSelectedBG(), null);
+                            donateButton.setBackground(d);
+                        } else {
+                            Drawable d = ResourcesCompat.getDrawable(
+                                    context.getResources(), idKeyPair.getUnselectedBG(), null);
+                            donateButton.setBackground(d);
+                        }
+                        donateButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                String name = (String) keyValuePairs.get("name");
+                                Map<String, Object> checked = new HashMap<>();
+                                boolean isChecked = !(Boolean) donated.get(name);
+                                donated.put(name, isChecked);
+                                checked.put(name, isChecked);
+                                docRef.update(checked);
+                                if (isChecked) {
+                                    holder.donatedView.setImageResource(donatedIcon);
+                                    Drawable d = ResourcesCompat.getDrawable(
+                                            context.getResources(), idKeyPair.getSelectedBG(), null);
+                                    view.setBackground(d);
+                                } else {
+                                    holder.donatedView.setImageResource(0);
+                                    Drawable d = ResourcesCompat.getDrawable(
+                                            context.getResources(), idKeyPair.getUnselectedBG(), null);
+                                    view.setBackground(d);
                                 }
                             }
                         });

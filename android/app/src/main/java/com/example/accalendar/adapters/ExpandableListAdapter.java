@@ -37,13 +37,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private int filterCount = 0;
     private Map<String, Object> fishCopy;
     private Map<String, Object> caught;
+    private Map<String, Object> donated;
     private Map<String, Integer> monthInts = new HashMap<>();
     private String query = "";
+    private ArrayList<Button> buttons = new ArrayList<>();
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, HashMap<String, Boolean>> listChildData,
                                  RecyclerviewAdapter adapter, Map<String, Object> fish, ArrayList<Boolean> isNorth,
-                                 Map<String, Object> fishCopy, Map<String, Object> caught) {
+                                 Map<String, Object> fishCopy, Map<String, Object> caught, Map<String, Object> donated) {
         this._context = context;
         this._listDataHeader = listDataHeader;
         this._listDataChild = listChildData;
@@ -52,6 +54,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.isNorth = isNorth;
         this.fishCopy = fishCopy;
         this.caught = caught;
+        this.donated = donated;
 
         monthInts.put("JAN", 1);
         monthInts.put("FEB", 2);
@@ -151,6 +154,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     }
                 });
                 listChild.addView(button);
+                buttons.add(button);
             }
             views.put(groupPosition, convertView);
 
@@ -158,7 +162,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         return views.get(groupPosition);
     }
 
-    private void filter() {
+    public void clear() {
+        filterCount = 0;
+        for (int i = 0; i < buttons.size(); i++) {
+            Button b = buttons.get(i);
+            b.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_off_button));
+        }
+    }
+
+    public void filter() {
         fish.clear();
         System.out.println(query);
         if(filterCount == 0) {
@@ -191,7 +203,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         key = "times";
                     else if (group == "Shadow Sizes")
                         key = "shadow size";
-                    else if (group == "Caught")
+                    else if (group == "Blathers")
                         key = "caught";
                     else {
                         if (isNorth.get(0))
@@ -236,9 +248,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                             } else if (key == "caught") {
                                 if(caught.containsKey(f.getKey())) {
                                     boolean hasCaught = (boolean) caught.get(f.getKey());
+                                    boolean hasDonated = (boolean) donated.get(f.getKey());
                                     if (value.equals("Caught") && hasCaught)
                                         isValid = true;
                                     else if (value.equals("Not Caught") && !hasCaught)
+                                        isValid = true;
+                                    else if (value.equals("Donated") && hasDonated)
+                                        isValid = true;
+                                    else if (value.equals("Not Donated") && !hasDonated)
                                         isValid = true;
                                 }
                             } else {
