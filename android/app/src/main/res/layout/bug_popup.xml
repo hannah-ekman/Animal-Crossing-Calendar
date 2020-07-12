@@ -26,11 +26,11 @@
                 android:id="@+id/cardtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/fishtitle"
+                android:background="@drawable/bugtitle"
                 android:gravity="center"
                 android:padding="15dp"
                 android:fontFamily="@font/josefin_sans_semibold"
-                android:text="Fish"
+                android:text="bug"
                 android:textColor="@android:color/white"
                 android:textSize="18dp"
                 android:textStyle="bold"
@@ -38,7 +38,7 @@
                 card_view:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
-                android:id="@+id/caughtfish"
+                android:id="@+id/caughtbug"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="20dp"
@@ -48,7 +48,7 @@
                 card_view:layout_constraintTop_toTopOf="@id/cardtitle" />
 
             <ImageButton
-                android:id="@+id/donatedfish"
+                android:id="@+id/donatedbug"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_margin="20dp"
@@ -57,21 +57,13 @@
                 card_view:layout_constraintStart_toStartOf="parent"
                 card_view:layout_constraintTop_toTopOf="@id/cardtitle" />
 
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline"
-                android:layout_width="1dp"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                card_view:layout_constraintGuide_percent="0.5" />
-
             <androidx.cardview.widget.CardView
 
-                android:id="@+id/fish_location"
+                android:id="@+id/bug_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                card_view:cardBackgroundColor="@color/fishPopUp"
+                card_view:cardBackgroundColor="@color/bugPopUp"
                 card_view:cardCornerRadius="10dp"
                 card_view:cardElevation="0dp"
                 card_view:layout_constraintEnd_toEndOf="parent"
@@ -88,7 +80,7 @@
                     android:paddingBottom="8dp">
 
                     <TextView
-                        android:id="@+id/fish_location_label"
+                        android:id="@+id/bug_location_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="4dp"
@@ -97,11 +89,11 @@
                         android:textColor="@android:color/white"
                         android:textSize="16dp"
                         android:textStyle="bold"
-                        card_view:layout_constraintEnd_toStartOf="@+id/fish_location_value"
+                        card_view:layout_constraintEnd_toStartOf="@+id/bug_location_value"
                         card_view:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/fish_location_value"
+                        android:id="@+id/bug_location_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="4dp"
@@ -109,73 +101,22 @@
                         android:text="river"
                         android:textColor="@android:color/white"
                         android:textSize="16dp"
-                        card_view:layout_constraintStart_toEndOf="@id/fish_location_label"
+                        card_view:layout_constraintStart_toEndOf="@id/bug_location_label"
                         card_view:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-
-                android:id="@+id/fish_shadow"
+                android:id="@+id/bug_price"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                card_view:cardBackgroundColor="@color/fishPopUp"
+                card_view:cardBackgroundColor="@color/bugPopUp"
                 card_view:cardCornerRadius="10dp"
                 card_view:cardElevation="0dp"
-                card_view:layout_constraintEnd_toStartOf="@id/guideline"
                 card_view:layout_constraintStart_toStartOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@id/fish_location">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:paddingLeft="8dp"
-                    android:paddingTop="8dp"
-                    android:paddingRight="8dp"
-                    android:paddingBottom="8dp">
-
-                    <TextView
-                        android:id="@+id/fish_shadow_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="4dp"
-                        android:fontFamily="@font/josefin_sans_semibold"
-                        android:text="Size:"
-                        android:textColor="@android:color/white"
-                        android:textSize="16dp"
-                        android:textStyle="bold"
-                        card_view:layout_constraintEnd_toStartOf="@+id/fish_shadow_value"
-                        card_view:layout_constraintStart_toStartOf="parent"
-                        card_view:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/fish_shadow_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="4dp"
-                        android:text="1"
-                        android:fontFamily="@font/josefin_sans_semibold"
-                        android:textColor="@android:color/white"
-                        android:textSize="16dp"
-                        card_view:layout_constraintEnd_toEndOf="parent"
-                        card_view:layout_constraintStart_toEndOf="@id/fish_shadow_label"
-                        card_view:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.cardview.widget.CardView>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/fish_price"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                card_view:cardBackgroundColor="@color/fishPopUp"
-                card_view:cardCornerRadius="10dp"
-                card_view:cardElevation="0dp"
-                card_view:layout_constraintStart_toEndOf="@id/guideline"
                 card_view:layout_constraintEnd_toEndOf="parent"
-                card_view:layout_constraintTop_toBottomOf="@id/fish_location">
+                card_view:layout_constraintTop_toBottomOf="@id/bug_location">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="wrap_content"
@@ -187,7 +128,7 @@
                     android:paddingBottom="8dp">
 
                     <TextView
-                        android:id="@+id/fish_price_label"
+                        android:id="@+id/bug_price_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="4dp"
@@ -196,12 +137,12 @@
                         android:textColor="@android:color/white"
                         android:textSize="16dp"
                         android:textStyle="bold"
-                        card_view:layout_constraintEnd_toStartOf="@+id/fish_price_value"
+                        card_view:layout_constraintEnd_toStartOf="@+id/bug_price_value"
                         card_view:layout_constraintStart_toStartOf="parent"
                         card_view:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
-                        android:id="@+id/fish_price_value"
+                        android:id="@+id/bug_price_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="4dp"
@@ -210,30 +151,30 @@
                         android:textColor="@android:color/white"
                         android:textSize="16dp"
                         card_view:layout_constraintEnd_toEndOf="parent"
-                        card_view:layout_constraintStart_toEndOf="@id/fish_price_label"
+                        card_view:layout_constraintStart_toEndOf="@id/bug_price_label"
                         card_view:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
             <com.example.accalendar.views.MonthView
-            card_view:layout_constraintTop_toBottomOf="@+id/fish_price"
-            card_view:layout_constraintEnd_toEndOf="parent"
-            card_view:layout_constraintStart_toStartOf="parent"
-            android:id="@+id/fish_months"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_margin="8dp"
-            card_view:rectangleColor="@color/fishPopUp"
-            card_view:highlightColor="@color/caughtFish" />
-            <com.example.accalendar.views.TimeView
-                card_view:layout_constraintTop_toBottomOf="@+id/fish_months"
+                card_view:layout_constraintTop_toBottomOf="@+id/bug_price"
                 card_view:layout_constraintEnd_toEndOf="parent"
                 card_view:layout_constraintStart_toStartOf="parent"
-                android:id="@+id/fish_times"
+                android:id="@+id/bug_months"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_margin="8dp"
+                card_view:rectangleColor="@color/bugPopUp"
+                card_view:highlightColor="@color/caughtBug" />
+            <com.example.accalendar.views.TimeView
+                card_view:layout_constraintTop_toBottomOf="@+id/bug_months"
+                card_view:layout_constraintEnd_toEndOf="parent"
+                card_view:layout_constraintStart_toStartOf="parent"
+                android:id="@+id/bug_times"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_margin="8dp"
-                card_view:timeRectangleColor="@color/fishPopUp"
-                card_view:timeBackgroundColor="@color/caughtFish"/>
+                card_view:timeRectangleColor="@color/bugPopUp"
+                card_view:timeBackgroundColor="@color/caughtBug"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </LinearLayout>

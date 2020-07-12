@@ -39,13 +39,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Map<String, Object> caught;
     private Map<String, Object> donated;
     private Map<String, Integer> monthInts = new HashMap<>();
+    private Map<String, Integer> timeInts = new HashMap<>();
     private String query = "";
+    private int tabColor, buttonOnDrawable, buttonOffDrawable;
     private ArrayList<Button> buttons = new ArrayList<>();
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, HashMap<String, Boolean>> listChildData,
                                  RecyclerviewAdapter adapter, Map<String, Object> fish, ArrayList<Boolean> isNorth,
-                                 Map<String, Object> fishCopy, Map<String, Object> caught, Map<String, Object> donated) {
+                                 Map<String, Object> fishCopy, Map<String, Object> caught, Map<String, Object> donated,
+                                 int tabColor, int buttonOnDrawable, int buttonOffDrawable) {
         this._context = context;
         this._listDataHeader = listDataHeader;
         this._listDataChild = listChildData;
@@ -55,6 +58,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.fishCopy = fishCopy;
         this.caught = caught;
         this.donated = donated;
+        this.tabColor = tabColor;
+        this.buttonOnDrawable = buttonOnDrawable;
+        this.buttonOffDrawable = buttonOffDrawable;
 
         monthInts.put("JAN", 1);
         monthInts.put("FEB", 2);
@@ -69,6 +75,30 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         monthInts.put("NOV", 11);
         monthInts.put("DEC", 12);
 
+        timeInts.put("24", 0);
+        timeInts.put("1", 1);
+        timeInts.put("2", 2);
+        timeInts.put("3", 3);
+        timeInts.put("4", 4);
+        timeInts.put("5", 5);
+        timeInts.put("6", 6);
+        timeInts.put("7", 7);
+        timeInts.put("8", 8);
+        timeInts.put("9", 9);
+        timeInts.put("10", 10);
+        timeInts.put("11", 11);
+        timeInts.put("12", 12);
+        timeInts.put("13", 13);
+        timeInts.put("14", 14);
+        timeInts.put("15", 15);
+        timeInts.put("16", 16);
+        timeInts.put("17", 17);
+        timeInts.put("18", 18);
+        timeInts.put("19", 19);
+        timeInts.put("20", 20);
+        timeInts.put("21", 21);
+        timeInts.put("22", 22);
+        timeInts.put("23", 23);
     }
 
     @Override
@@ -135,19 +165,19 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 button.setTextSize(15);
                 button.setText(key);
                 button.setTextColor(Color.WHITE);
-                button.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_off_button));
+                button.setBackground(_context.getResources().getDrawable(buttonOffDrawable));
                 button.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         boolean tf = !filters.get(key);
                         filters.put(key, tf);
                         System.out.println(filters);
                         if (tf) {
-                            v.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_on_button));
+                            v.setBackground(_context.getResources().getDrawable(buttonOnDrawable));
                             filterCount += 1;
                             filter();
                         }
                         else {
-                            v.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_off_button));
+                            v.setBackground(_context.getResources().getDrawable(buttonOffDrawable));
                             filterCount -= 1;
                             filter();
                         }
@@ -224,8 +254,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 for (int i = 0; i < times.size(); i++) {
                                     Map<String, Long> time = times.get(i);
                                     if (key == "north" || key == "south") { // this is a month
-                                        if (time.get("start") <= monthInts.get(value) && time.get("end") >= monthInts.get(value))
-                                            isValid = true;
+                                        if (time.get("start") < time.get("end"))
+                                            if (time.get("start") <= monthInts.get(value) && time.get("end") >= monthInts.get(value))
+                                                isValid = true;
                                     } else { // this is a time
                                         if (value.equals("All Day")) {
                                             if (time.get("start") == 0 && time.get("end") == 24)
@@ -239,8 +270,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                         } else if (value.equals("9 AM - 4 PM")) {
                                             if (time.get("start") == 9 && time.get("end") == 16)
                                                 isValid = true;
-                                        } else {
+                                        } else if (value.equals("9 PM - 4 AM")) {
                                             if (time.get("start") == 21 && time.get("end") == 4)
+                                                isValid = true;
+                                        }else if(time.get("start") < time.get("end")) {
+                                            if (time.get("start") <= timeInts.get(value) && time.get("end") >= timeInts.get(value))
+                                                isValid = true;
+                                        } else {
+                                            if (time.get("start") <= timeInts.get(value) || time.get("end") >= timeInts.get(value))
                                                 isValid = true;
                                         }
                                     }
@@ -305,6 +342,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.expandablelistgroup, null);
+            convertView.setBackgroundResource(tabColor);
             TextView lblListHeader = (TextView) convertView
                     .findViewById(R.id.text_title);
             Typeface typeface = Typeface.createFromAsset(_context.getAssets(), "fonts/josefin_sans_semibold.ttf");

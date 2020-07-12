@@ -1,12 +1,13 @@
 package com.example.accalendar;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.icu.util.Calendar;
+import java.util.Calendar;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -65,6 +66,7 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import org.threeten.bp.LocalDate;
 import org.threeten.bp.format.DateTimeFormatter;
@@ -74,6 +76,8 @@ import org.threeten.bp.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CalendarActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnDateSelectedListener {
@@ -83,9 +87,12 @@ public class CalendarActivity extends AppCompatActivity
     private FirebaseUser user;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private long dateOffset;
-    private boolean isChecked;
-    private boolean isNorthern;
+    private long dateOffset = 0;
+    private long timeOffset = 0;
+    private boolean isChecked = false;
+    private boolean isNorthern = true;
+    private LocalDate timeTravelDate;
+    private int mins = 0;
     private DatePickerDialog.OnDateSetListener mDateSetListener;
     private Map<String, Map<String, Long>> events = new HashMap<>();
     private Map<String, Map<String, Map<String, Long>>> specialDays = new HashMap<>();
@@ -94,6 +101,7 @@ public class CalendarActivity extends AppCompatActivity
     private Map<String, Map<String, Object>> resources = new HashMap<>();
     private Map<String, HashMap<String, Object>> birthdays = new HashMap<>();
     private ArrayList<TargetDrawable> targets = new ArrayList<>();
+    private Timer autoUpdate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,35 +130,36 @@ public class CalendarActivity extends AppCompatActivity
                     updateFirestore("users", user.getUid(), new HashMap<String, Object>() {{
                         put("isTimeTravel", true);
                     }});
-                    updateCalendarDate(dateOffset);
+                    updateCalendarDate(dateOffset, timeOffset);
                     travelDate.setVisibility(View.VISIBLE);
                 } else {
                     dateOffset = 0;
+                    timeOffset = 0;
                     updateFirestore("users", user.getUid(), new HashMap<String, Object>() {{
                         put("isTimeTravel", false);
                         put("dateOffset", dateOffset);
+                        put("timeOffset", timeOffset);
                     }});
-                    updateCalendarDate(dateOffset);
+                    updateCalendarDate(dateOffset, timeOffset);
                     travelDate.setVisibility(View.INVISIBLE);
                 }
             }
         });
 
-        getUserFields("users", user.getUid(), new String[]{"isTimeTravel", "dateOffset", "isNorthern"});
-
+        getUserFields("users", user.getUid(), new String[]{"isTimeTravel", "dateOffset",
+                "timeOffset", "isNorthern"});
+        final Calendar cal = Calendar.getInstance();
         travelDate.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                Calendar cal = Calendar.getInstance();
                 int year = cal.get(Calendar.YEAR);
                 int month = cal.get(Calendar.MONTH);
                 int day = cal.get(Calendar.DAY_OF_MONTH);
 
                 DatePickerDialog dialog = new DatePickerDialog(CalendarActivity.this,
-                        android.R.style.Theme_Holo_Light_Dialog, mDateSetListener,
+                        android.R.style.Theme_Material_Dialog, mDateSetListener,
                         year, month, day);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.show();
             }
         });
@@ -163,7 +172,22 @@ public class CalendarActivity extends AppCompatActivity
                 updateFirestore("users", user.getUid(), new HashMap<String, Object>() {{
                     put("dateOffset", dateOffset);
                 }});
-                updateCalendarDate(dateOffset);
+                new TimePickerDialog(CalendarActivity.this, android.R.style.Theme_Material_Dialog,
+                        new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        int curHour = cal.get(Calendar.HOUR_OF_DAY);
+                        int curMin = cal.get(Calendar.MINUTE);
+                        curMin += curHour * 60;
+                        minute += hourOfDay * 60;
+                        timeOffset = minute - curMin;
+                        updateFirestore("users", user.getUid(), new HashMap<String, Object>() {{
+                            put("timeOffset", timeOffset);
+                        }});
+                        updateCalendarDate(dateOffset, timeOffset);
+                    }
+                }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), false).show();
+                updateCalendarDate(dateOffset, timeOffset);
             }
         };
 
@@ -176,6 +200,22 @@ public class CalendarActivity extends AppCompatActivity
                         .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        autoUpdate = new Timer();
+        autoUpdate.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        updateCalendarDate(dateOffset, timeOffset);
+                    }
+                });
+            }
+        }, 0, 60000); // updates each 40 secs
     }
 
     @Override
@@ -276,21 +316,46 @@ public class CalendarActivity extends AppCompatActivity
         return listViews;
     }
 
-    private void updateCalendarDate(long offset) {
+    private void updateCalendarDate(long offset, long timeOffset) {
+        Calendar cal = Calendar.getInstance();
+        int mins = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE) + (int) timeOffset;
         LocalDate date = LocalDate.now().plus(offset, ChronoUnit.DAYS);
-        MaterialCalendarView calendarView = findViewById(R.id.calendarView);
-        if (currentDecorator != null) {
-            calendarView.removeDecorator(currentDecorator);
-            calendarView.invalidateDecorators();
+        if (mins >= 24 * 60) {
+            mins -= 24 * 60;
+            date = date.plus(1, ChronoUnit.DAYS);
         }
-        currentDecorator = new CurrentDayDecorator(
-                ResourcesCompat.getColor(getResources(), R.color.selectedGreen, null), date);
-        calendarView.addDecorator(currentDecorator);
-        TextView dateText = findViewById(R.id.travelDate);
-        dateText.setText(date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)));
-        updateSeasonalResources(date);
-        calendarView.setCurrentDate(CalendarDay.from(date));
+        if (timeTravelDate == null || !timeTravelDate.equals(date)) {
+            timeTravelDate = date;
+            this.mins = mins;
+            MaterialCalendarView calendarView = findViewById(R.id.calendarView);
+            if (currentDecorator != null) {
+                calendarView.removeDecorator(currentDecorator);
+                calendarView.invalidateDecorators();
+            }
+            currentDecorator = new CurrentDayDecorator(
+                    ResourcesCompat.getColor(getResources(), R.color.selectedGreen, null), date);
+            calendarView.addDecorator(currentDecorator);
+            updateTimeTravelButton(date, mins);
+            updateSeasonalResources(date);
+            calendarView.setCurrentDate(CalendarDay.from(date));
+        } else if (this.mins != mins) {
+            this.mins = mins;
+            updateTimeTravelButton(date, mins);
+        }
     }
+
+    private void updateTimeTravelButton(LocalDate date, int mins) {
+        int hour = mins / 60;
+        mins = mins % 60;
+        boolean isPM = hour >= 12;
+        if (isPM && hour != 12)
+            hour = hour - 12;
+        String time = hour + ":" + (mins < 10 ? "0" : "") + mins + " " + (isPM ? "PM" : "AM");
+        TextView dateText = findViewById(R.id.travelDate);
+        dateText.setText(date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+                + " "+ time);
+    }
+
 
     private void updateSeasonalResources(LocalDate date) {
         LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -323,25 +388,32 @@ public class CalendarActivity extends AppCompatActivity
 
     private void updateFieldVars(DocumentSnapshot doc, String[] fields) {
         for (String field : fields) {
-            switch (field) {
-                case "isTimeTravel":
-                    Switch timeToggle = findViewById(R.id.timeToggle);
-                    isChecked = (boolean) doc.get(field);
-                    timeToggle.setChecked(isChecked);
-                    break;
-                case "dateOffset":
-                    dateOffset = (long) doc.get(field);
-                    updateCalendarDate(dateOffset);
-                    break;
-                case "isNorthern":
-                    isNorthern = (boolean) doc.get(field);
-                    getTourneys();
-                    getSeasonalResources();
-                    getSpecialDays();
-                    getVillagers(user.getUid());
-                    getYearlyEvents();
-                default:
-                    break;
+            if (doc.contains(field)) {
+                switch (field) {
+                    case "isTimeTravel":
+                        Switch timeToggle = findViewById(R.id.timeToggle);
+                        isChecked = (boolean) doc.get(field);
+                        timeToggle.setChecked(isChecked);
+                        break;
+                    case "dateOffset":
+                        dateOffset = (long) doc.get(field);
+                        updateCalendarDate(dateOffset, timeOffset);
+                        break;
+                    case "isNorthern":
+                        isNorthern = (boolean) doc.get(field);
+                        getTourneys();
+                        getSeasonalResources();
+                        getSpecialDays();
+                        getVillagers(user.getUid());
+                        getYearlyEvents();
+                        break;
+                    case "timeOffset":
+                        timeOffset = (long) doc.get(field);
+                        updateCalendarDate(dateOffset, timeOffset);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
@@ -523,7 +595,7 @@ public class CalendarActivity extends AppCompatActivity
                             Drawable d = ResourcesCompat.getDrawable(getResources(),
                                     R.drawable.cherryblossomicon, null);
                             calendar.addDecorator(new ResourceDecorator(resources, d));
-                            updateCalendarDate(dateOffset);
+                            updateCalendarDate(dateOffset, timeOffset);
                         }
                     } else {
                         Log.d(TAG, "No such document");
@@ -569,7 +641,8 @@ public class CalendarActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             // Handle the camera action
         } else if (id == R.id.nav_bug) {
-
+            Intent intent = new Intent(this, Bug.class);
+            startActivity(intent);
         } else if (id == R.id.nav_fish) {
             Intent intent = new Intent(this, Fish.class);
             startActivity(intent);

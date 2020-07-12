@@ -20,5 +20,11 @@
     <color name="fishtoolbar">#2b6fa3</color>
     <color name="transparentWhite">#50ffffff</color>
     <color name="transparent">#00ffffff</color>
+    <color name="caughtBug">#87bc6d</color>
+    <color name="bugborder">#87bc6d</color>
+    <color name="bugPopUp">#abe69c</color>
+    <color name="bugBackground">#b4e699</color>
+    <color name="notCaughtbug">#c9edbf</color>
+    <color name="bugtoolbar">#458137</color>
 </resources>
 

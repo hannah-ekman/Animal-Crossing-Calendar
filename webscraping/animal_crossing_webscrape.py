@@ -11,7 +11,7 @@ from enum import Enum
 
 #Probably gonna have to make this more generalized so we can use it for bugs as well
 
-Entity = Enum('Entity', 'fish bug')
+Entity = Enum('Entity', 'fish bug fossil')
 
 cred=credentials.Certificate('./service-account.json') #I'm gitignoring this so that it's not publicly available online, I'll send it to you
 firebase_admin.initialize_app(cred, {
@@ -163,6 +163,42 @@ def uploadToFirestore(url, name, entity):
 def uploadToFirebase(entry, entity):
     db.collection(u'trackables').document(entity.name).update(entry)
 
+def setLocation(location):
+    if location == "On Trees":
+        return "Trees"
+    if location == "On Trees (Coconut)" or location == "On Trees (Coconut?)":
+        return "Coconut Trees"
+    if location == "Beach disguised as Shells":
+        return "Disguised (Shell)"
+    if location == "Under Trees Disguised as Leafs":
+        return "Disguised (Leaf)"
+    if location == "On Tree Stumps":
+        return "Tree Stumps"
+    if location == "On Trash Items":
+        return "Trash Items"
+    if location == "On the Ground":
+        return "Ground"
+    if location == "On rotten food":
+        return "Rotten Food"
+    if location == "On Flowers":
+        return "Flowers"
+    if location == "On Flowers (White)":
+        return "Flowers (White)"
+    if location == "On Ponds and Rivers":
+        return "Rivers and Ponds"
+    if location == "On Rocks and Bushes (Rain)":
+        return "Rocks and Bushes (Rain)"
+    if location == "Flying by Hybrid Flowers":
+        return "Flying (Hybrid Flowers)"
+    if location == "Flying by Light":
+        return "Flying (Light)"
+    if location == "On Beach Rocks":
+        return "Beach Rocks"
+    if location == "On the Ground (rolling snowballs)":
+        return "Ground (Rolling Snowballs)"
+    return location
+
+
 #beautifulsoup object with raw HTML content and parser passed in
 #lxml is the default parser
 def get_images(r, entity): 
@@ -183,10 +219,11 @@ def get_images(r, entity):
         price = int(str(northernSoup.find('td', {'class': 'price'}).contents[0]).strip().replace(',', ''))
         icon = northernSoup.find('a', {"class": "image image-thumbnail"})['href']
         location = str(northernSoup.find('td', {"class": 'location'}).contents[0]).strip()
+        if (Entity.bug):
+            location = setLocation(location)
         shadow = None
         if entity == Entity.fish:
             shadow = str(northernSoup.find('td', {'class': 'shadow size'}).contents[0]).strip()
-        print(shadow)
         time = str(northernSoup.find('td', {'class': 'time'}).contents[0]).strip()
         janN = str(northernSoup.find('td', {'class': 'jan'}).contents[0]).strip()
         febN = str(northernSoup.find('td', {'class': 'feb'}).contents[0]).strip()
@@ -236,10 +273,13 @@ def get_images(r, entity):
         uploadToFirebase(fishInfo, entity)
 
 f = open('fish.html', 'r')
-get_images(f, Entity.fish)
+#get_images(f, Entity.fish)
 f.close()
 f = open('bug.html', 'r')
-get_images(f, Entity.bug)
+#get_images(f, Entity.bug)
+f.close()
+f = open('fossil.html', 'r')
+get_images(f, Entity.fossil)
 #get_images(r, make_folder('FishPic'))
 #get_images(r2, make_folder('BugPic'))
 #get_images(r3, make_folder('FossilPic'))

@@ -213,7 +213,7 @@ public class ClassUtils {
                                 boolean isChecked = !(Boolean) donated.get(name);
                                 donated.put(name, isChecked);
                                 checked.put(name, isChecked);
-                                docRef.update(checked);
+                                donatedRef.update(checked);
                                 if (isChecked) {
                                     holder.donatedView.setImageResource(donatedIcon);
                                     Drawable d = ResourcesCompat.getDrawable(
