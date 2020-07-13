@@ -637,7 +637,8 @@ public class Fish extends AppCompatActivity
             Intent intent = new Intent(this, CalendarActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_bug) {
-
+            Intent intent = new Intent(this, Bug.class);
+            startActivity(intent);
         } else if (id == R.id.nav_fish) {
 
         } else if (id == R.id.nav_fossil) {

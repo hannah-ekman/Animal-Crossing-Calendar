@@ -196,7 +196,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         filterCount = 0;
         for (int i = 0; i < buttons.size(); i++) {
             Button b = buttons.get(i);
-            b.setBackground(_context.getResources().getDrawable(R.drawable.fish_filter_off_button));
+            b.setBackground(_context.getResources().getDrawable(buttonOffDrawable));
         }
     }
 

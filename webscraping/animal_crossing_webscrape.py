@@ -272,6 +272,51 @@ def get_images(r, entity):
         print(name, fishInfo)
         uploadToFirebase(fishInfo, entity)
 
+def get_fossil_images(r, entity): 
+    soup = bs(r, features="lxml")
+    standalone = str(soup.find('table', {'class': 'standalone'}))
+    multipart = str(soup.find('table', {'class': 'multipart'}))
+    standaloneTable = bs(standalone, features="lxml")
+    multipartTable = bs(multipart, features="lxml")
+    standaloneEntries = standaloneTable.findAll('tr', {'class': 'entry'})
+    multipartEntries = multipartTable.findAll('tr', {'class': 'entry'})
+
+    for i in range(len(standaloneEntries)):
+        #parse the HTML for standalone entries
+        standaloneSoup = bs(str(standaloneEntries[i]), features="lxml")
+        nameHTML = bs(str(standaloneSoup.find('td', {"class": 'name'})), features="lxml")
+        #ask why strip was necessary again
+        name = str(nameHTML.find('a').contents[0]).strip()
+        price = int(str(standaloneSoup.find('td', {'class': 'price'}).contents[0]).strip().replace(',', ''))
+        icon = standaloneSoup.find('a', {"class": "image image-thumbnail"})['href']
+        url = uploadToFirestore(icon, name, entity)
+        fossilInfo = { 
+            db.field_path(name): {
+                u"price": price,
+                u"image": url,
+                u"index": i,
+            }
+        }
+        print(name, fossilInfo)
+        uploadToFirebase(fossilInfo, entity)
+    for i in range(len(multipartEntries)):
+        #parse the HTML for multipart entries
+        multipartSoup = bs(str(multipartEntries[i]), features="lxml")
+        nameHTML = bs(str(multipartSoup.find('td', {"class": 'name'})), features="lxml")
+        name = str(nameHTML.find('a').contents[0]).strip()
+        price = int(str(multipartSoup.find('td', {'class': 'price'}).contents[0]).strip().replace(',', ''))
+        icon = multipartSoup.find('a', {"class": "image image-thumbnail"})['href']
+        url = uploadToFirestore(icon, name, entity)
+        fossilInfo = { 
+            db.field_path(name): {
+                u"price": price,
+                u"image": url,
+                u"index": i,
+            }
+        }
+        print(name, fossilInfo)
+        uploadToFirebase(fossilInfo, entity)
+
 f = open('fish.html', 'r')
 #get_images(f, Entity.fish)
 f.close()
@@ -279,7 +324,7 @@ f = open('bug.html', 'r')
 #get_images(f, Entity.bug)
 f.close()
 f = open('fossil.html', 'r')
-get_images(f, Entity.fossil)
+get_fossil_images(f, Entity.fossil)
 #get_images(r, make_folder('FishPic'))
 #get_images(r2, make_folder('BugPic'))
 #get_images(r3, make_folder('FossilPic'))
