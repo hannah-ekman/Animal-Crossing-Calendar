@@ -3,9 +3,7 @@ package com.example.accalendar;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import java.util.Calendar;
 import android.os.Build;
@@ -17,7 +15,7 @@ import com.example.accalendar.decorators.EventDecorator;
 import com.example.accalendar.decorators.ResourceDecorator;
 import com.example.accalendar.decorators.SpecialDecorator;
 import com.example.accalendar.decorators.TourneyDecorator;
-import com.example.accalendar.adapters.EventAdapter;
+import com.example.accalendar.adapters.ListAdapter;
 import com.example.accalendar.utils.DocSnapToData;
 import com.example.accalendar.utils.InflateLayouts;
 import com.example.accalendar.utils.TargetDrawable;
@@ -36,7 +34,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
@@ -150,16 +147,21 @@ public class CalendarActivity extends AppCompatActivity
                 "timeOffset", "isNorthern"});
         final Calendar cal = Calendar.getInstance();
         travelDate.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 int year = cal.get(Calendar.YEAR);
                 int month = cal.get(Calendar.MONTH);
                 int day = cal.get(Calendar.DAY_OF_MONTH);
 
-                DatePickerDialog dialog = new DatePickerDialog(CalendarActivity.this,
-                        android.R.style.Theme_Material_Dialog, mDateSetListener,
-                        year, month, day);
+                DatePickerDialog dialog = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    dialog = new DatePickerDialog(CalendarActivity.this,
+                            android.R.style.Theme_Material_Dialog, mDateSetListener,
+                            year, month, day);
+                } else {
+                    dialog = new DatePickerDialog(CalendarActivity.this, mDateSetListener,
+                            year, month, day);
+                }
                 dialog.show();
             }
         });
@@ -172,8 +174,7 @@ public class CalendarActivity extends AppCompatActivity
                 updateFirestore("users", user.getUid(), new HashMap<String, Object>() {{
                     put("dateOffset", dateOffset);
                 }});
-                new TimePickerDialog(CalendarActivity.this, android.R.style.Theme_Material_Dialog,
-                        new TimePickerDialog.OnTimeSetListener() {
+                TimePickerDialog.OnTimeSetListener timeSet =  new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         int curHour = cal.get(Calendar.HOUR_OF_DAY);
@@ -186,7 +187,17 @@ public class CalendarActivity extends AppCompatActivity
                         }});
                         updateCalendarDate(dateOffset, timeOffset);
                     }
-                }, cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), false).show();
+                };
+                TimePickerDialog timePicker = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    timePicker = new TimePickerDialog(CalendarActivity.this,
+                            android.R.style.Theme_Material_Dialog, timeSet, cal.get(Calendar.HOUR_OF_DAY),
+                            cal.get(Calendar.MINUTE), false);
+                } else {
+                    timePicker = new TimePickerDialog(CalendarActivity.this, timeSet,
+                            cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), false);
+                }
+                timePicker.show();
                 updateCalendarDate(dateOffset, timeOffset);
             }
         };
@@ -233,7 +244,7 @@ public class CalendarActivity extends AppCompatActivity
             Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin_sans_semibold.ttf");
             title.setTypeface(typeface);
             ListView list = popView.findViewById(R.id.eventList);
-            EventAdapter listAdapter = new EventAdapter(popView.getContext(), eventViews);
+            ListAdapter listAdapter = new ListAdapter(popView.getContext(), eventViews);
             list.setAdapter(listAdapter);
             listAdapter.notifyDataSetChanged();
             String month = day.getMonth().name();
@@ -652,6 +663,9 @@ public class CalendarActivity extends AppCompatActivity
             signOut();
         } else if (id == R.id.nav_send) {
 
+        } else if (id == R.id.profile) {
+            Intent intent = new Intent(this, Profile.class);
+            startActivity(intent);
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

@@ -7,15 +7,15 @@ import android.widget.ArrayAdapter;
 
 import java.util.ArrayList;
 
-public class EventAdapter extends ArrayAdapter<View> {
-    public EventAdapter(Context context, ArrayList<View> events) {
-        super(context, 0, events);
+public class ListAdapter extends ArrayAdapter<View> {
+    public ListAdapter(Context context, ArrayList<View> views) {
+        super(context, 0, views);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        View event = getItem(position);
-        return event;
+        View v = getItem(position);
+        return v;
     }
 }

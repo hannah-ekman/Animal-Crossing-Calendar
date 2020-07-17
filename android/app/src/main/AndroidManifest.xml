@@ -26,21 +26,25 @@
         </activity>
         <activity android:name=".signup"
             android:label="Sign Up"
-            android:noHistory="true"/>
+            android:noHistory="false"/>
         <activity android:name=".login"
             android:label="Log In"
-            android:noHistory="true"/>
+            android:noHistory="false"/>
         <activity android:name=".Fish"
             android:label="Fish Tracker"
-            android:noHistory="true"
+            android:noHistory="false"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".Bug"
             android:label="Bug Tracker"
-            android:noHistory="true"
+            android:noHistory="false"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".NewProfile"
             android:label="New Profile"
-            android:noHistory="true"/>
+            android:noHistory="false"/>
+        <activity android:name=".Profile"
+            android:label="Profile"
+            android:noHistory="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

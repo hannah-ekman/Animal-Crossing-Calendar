@@ -7,11 +7,12 @@ import requests
 from lxml import html
 import os
 import datetime
+import calendar
 from enum import Enum
 
 #Probably gonna have to make this more generalized so we can use it for bugs as well
 
-Entity = Enum('Entity', 'fish bug fossil')
+Entity = Enum('Entity', 'fish bug fossil deepSea villagers')
 
 cred=credentials.Certificate('./service-account.json') #I'm gitignoring this so that it's not publicly available online, I'll send it to you
 firebase_admin.initialize_app(cred, {
@@ -22,71 +23,6 @@ firebase_admin.initialize_app(cred, {
 db = firestore.client()
 
 bucket = storage.bucket()
-
-"""
-fish = 'https://animalcrossing.fandom.com/wiki/Fish_(New_Horizons)'
-#getting the webpage
-r = requests.get(fish)
-
-bug = 'https://animalcrossing.fandom.com/wiki/Bugs_(New_Horizons)'
-r2 = requests.get(bug)
-
-fossil = 'https://animalcrossing.fandom.com/wiki/Fossils_(New_Horizons)'
-r3 = requests.get(fossil)
-
-tools = 'https://animalcrossing.fandom.com/wiki/DIY_recipes/Tools'
-r4 = requests.get(tools)
-
-housewares = 'https://animalcrossing.fandom.com/wiki/DIY_recipes/Housewares'
-r5 = requests.get(housewares)
-
-miscellaneous = 'https://animalcrossing.fandom.com/wiki/DIY_recipes/Miscellaneous'
-r6 = requests.get(miscellaneous)
-
-wall_mounted = 'https://animalcrossing.fandom.com/wiki/DIY_recipes/Wall-mounted'
-r7 = requests.get(wall_mounted)
-
-#we probably want to separate this into separate ones
-#there are pages that separate these but some seem to be under construction
-wallpaper_rugs_flooring = 'https://animalcrossing.fandom.com/wiki/DIY_recipes/Wallpaper,_rugs_and_flooring'
-r8 = requests.get(wallpaper_rugs_flooring)
-
-equipment = 'https://animalcrossing.fandom.com/wiki/DIY_recipes/Equipment'
-r9 = requests.get(equipment)
-
-other = 'https://animalcrossing.fandom.com/wiki/DIY_recipes/Other'
-r10 = requests.get(other)
-
-art = 'https://animalcrossing.fandom.com/wiki/Art_(New_Horizons)'
-r11 = requests.get(art)
-
-tops = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Tops'
-r12 = requests.get(tops)
-
-bottoms = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Bottoms'
-r13 = requests.get(bottoms)
-
-dresses = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Dresses'
-r14 = requests.get(dresses)
-
-hats = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Hats'
-r15 = requests.get(hats)
-
-accessories = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Accessories'
-r16 = requests.get(accessories)
-
-socks = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Socks'
-r17 = requests.get(socks)
-
-shoes = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Shoes'
-r18 = requests.get(shoes)
-
-bags = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Bags'
-r19 = requests.get(bags)
-
-umbrellas = 'https://animalcrossing.fandom.com/wiki/Clothing_(New_Horizons)/Umbrellas'
-r20 = requests.get(umbrellas)
-"""
 
 #We need to probably either get rid of stuff to avoid repetition
 #or just make it so that if one is checked off in one activity, it's also marked as true in the other
@@ -218,12 +154,16 @@ def get_images(r, entity):
         name = str(nameHTML.find('a').contents[0]).strip()
         price = int(str(northernSoup.find('td', {'class': 'price'}).contents[0]).strip().replace(',', ''))
         icon = northernSoup.find('a', {"class": "image image-thumbnail"})['href']
-        location = str(northernSoup.find('td', {"class": 'location'}).contents[0]).strip()
-        if (Entity.bug):
+        if entity == Entity.bug:
+            location = str(northernSoup.find('td', {"class": 'location'}).contents[0]).strip()
             location = setLocation(location)
         shadow = None
         if entity == Entity.fish:
             shadow = str(northernSoup.find('td', {'class': 'shadow size'}).contents[0]).strip()
+            location = str(northernSoup.find('td', {"class": 'location'}).contents[0]).strip()
+        if entity == Entity.deepSea:
+            shadow = str(northernSoup.find('td', {'class': 'shadow size'}).contents[0]).strip()
+            swimPattern = str(northernSoup.find('td', {'class': 'swimming pattern'}).contents[0]).strip()
         time = str(northernSoup.find('td', {'class': 'time'}).contents[0]).strip()
         janN = str(northernSoup.find('td', {'class': 'jan'}).contents[0]).strip()
         febN = str(northernSoup.find('td', {'class': 'feb'}).contents[0]).strip()
@@ -260,15 +200,17 @@ def get_images(r, entity):
             db.field_path(name): {
                 u"price": price,
                 u"image": url,
-                u"location": location,
                 u"times": time,
                 u"north": monthN,
                 u"south": monthS,
                 u"index": i
             }
         }
-        if entity == Entity.fish:
+        if entity == Entity.fish or entity == Entity.bug:
             fishInfo[db.field_path(name)][u"shadow size"] = shadow
+            fishInfo[db.field_path(name)][u"location"] = location
+        if entity == Entity.deepSea:
+            fishInfo[db.field_path(name)][u"swim pattern"] = swimPattern
         print(name, fishInfo)
         uploadToFirebase(fishInfo, entity)
 
@@ -285,7 +227,6 @@ def get_fossil_images(r, entity):
         #parse the HTML for standalone entries
         standaloneSoup = bs(str(standaloneEntries[i]), features="lxml")
         nameHTML = bs(str(standaloneSoup.find('td', {"class": 'name'})), features="lxml")
-        #ask why strip was necessary again
         name = str(nameHTML.find('a').contents[0]).strip()
         price = int(str(standaloneSoup.find('td', {'class': 'price'}).contents[0]).strip().replace(',', ''))
         icon = standaloneSoup.find('a', {"class": "image image-thumbnail"})['href']
@@ -317,14 +258,65 @@ def get_fossil_images(r, entity):
         print(name, fossilInfo)
         uploadToFirebase(fossilInfo, entity)
 
+def get_villagers(r, entity): 
+    soup = bs(r, features="lxml")
+    villagers = str(soup.find('table', {'class': 'villagers'}))
+    villagerTable = bs(villagers, features="lxml")
+    villagerEntries = villagerTable.findAll('tr', {'class': 'entry'})
+
+    for i in range(len(villagerEntries)):
+        #parse the HTML
+        villagerSoup = bs(str(villagerEntries[i]), features="lxml")
+        nameHTML = bs(str(villagerSoup.find('td', {"class": 'name'})), features="lxml")
+        name = str(nameHTML.find('a').contents[0]).strip()
+        pic = villagerSoup.find('a', {"class": "image image-thumbnail"})['href']
+        personalityHTML = bs(str(villagerSoup.find('td', {"class": 'personality'})), features="lxml")
+        personality = str(personalityHTML.find('a').contents[0]).strip()
+        speciesHTML = bs(str(villagerSoup.find('td', {"class": 'species'})), features="lxml")
+        species = str(speciesHTML.find('a').contents[0]).strip()
+        birthday = str(villagerSoup.find('td', {'class': 'birthday'}).contents[0]).strip()
+        monthStr, dayStr = firstName, lastName = birthday.split(' ', 1)
+        month = datetime.datetime.strptime(monthStr, "%B").month
+        day = int(dayStr)
+        catchphrase = str(villagerSoup.find('td', {'class': 'catchphrase'}).contents[0]).strip()
+        catchphrase = catchphrase.strip('"')
+        hobby = str(villagerSoup.find('td', {'class': 'hobby'}).contents[0]).strip()
+        
+        url = uploadToFirestore(pic, name, entity)
+        villagerInfo = { 
+            db.field_path(name): {
+                u"image": url,
+                u"personality": personality,
+                u"species": species,
+                u"month": month,
+                u"day": day,
+                u"catchphrase": catchphrase,
+                u"hobby": hobby,
+                u"index": i
+            }
+        }
+        print(name, villagerInfo)
+        uploadToFirebase(villagerInfo, entity)
+
 f = open('fish.html', 'r')
 #get_images(f, Entity.fish)
 f.close()
 f = open('bug.html', 'r')
 #get_images(f, Entity.bug)
 f.close()
+
 f = open('fossil.html', 'r')
-get_fossil_images(f, Entity.fossil)
+#get_fossil_images(f, Entity.fossil)
+f.close()
+
+f = open('deepsea.html', 'r')
+#get_images(f, Entity.deepSea)
+f.close()
+
+f = open('villagers.html', 'r')
+get_villagers(f, Entity.villagers)
+f.close()
+
 #get_images(r, make_folder('FishPic'))
 #get_images(r2, make_folder('BugPic'))
 #get_images(r3, make_folder('FossilPic'))
