@@ -83,16 +83,24 @@ public class DocSnapToData {
             sortBy = "price";
         else if (key == "Name")
             sortBy = "name";
+        else if (key == "Catchphrase")
+            sortBy = "catchphrase";
 
         // Sort the list
         final String finalSortBy = sortBy;
         Collections.sort(list, new Comparator<Map.Entry<String, Object>>() {
             @Override
             public int compare(Map.Entry<String, Object> o1, Map.Entry<String, Object> o2) {
-                if(finalSortBy == "name"){
+                if (finalSortBy == "name"){
                     String fish1 = o1.getKey();
                     String fish2 = o2.getKey();
                     return fish1.compareTo(fish2);
+                } else if (finalSortBy == "catchphrase") {
+                    Map<String, Object> fish1 = (Map<String, Object>) o1.getValue();
+                    Map<String, Object> fish2 = (Map<String, Object>) o2.getValue();
+                    String i1 = (String) fish1.get(finalSortBy);
+                    String i2 = (String) fish2.get(finalSortBy);
+                    return (i1.toLowerCase()).compareTo((i2.toLowerCase()));
                 } else {
                     Map<String, Object> fish1 = (Map<String, Object>) o1.getValue();
                     Map<String, Object> fish2 = (Map<String, Object>) o2.getValue();

@@ -96,8 +96,9 @@ def uploadToFirestore(url, name, entity):
     url = blob.generate_signed_url(expiration=d) #Generate the signed url to pass to firebase since pulic_url isn't actually public...
     return url
 
-def uploadToFirebase(entry, entity):
-    db.collection(u'trackables').document(entity.name).update(entry)
+def uploadToFirebase(entry, entity, name):
+    #db.collection(u'trackables').document(entity.name).update(entry)
+    db.collection(entity.name).document(name).create(entry)
 
 def setLocation(location):
     if location == "On Trees":
@@ -197,14 +198,12 @@ def get_images(r, entity):
         monthS = parseMonths(monthS)
         time = parseTime(time)
         fishInfo = { 
-            db.field_path(name): {
-                u"price": price,
-                u"image": url,
-                u"times": time,
-                u"north": monthN,
-                u"south": monthS,
-                u"index": i
-            }
+            u"price": price,
+            u"image": url,
+            u"times": time,
+            u"north": monthN,
+            u"south": monthS,
+            u"index": i
         }
         if entity == Entity.fish or entity == Entity.bug:
             fishInfo[db.field_path(name)][u"shadow size"] = shadow
@@ -212,7 +211,7 @@ def get_images(r, entity):
         if entity == Entity.deepSea:
             fishInfo[db.field_path(name)][u"swim pattern"] = swimPattern
         print(name, fishInfo)
-        uploadToFirebase(fishInfo, entity)
+        uploadToFirebase(fishInfo, entity, name)
 
 def get_fossil_images(r, entity): 
     soup = bs(r, features="lxml")
@@ -232,14 +231,12 @@ def get_fossil_images(r, entity):
         icon = standaloneSoup.find('a', {"class": "image image-thumbnail"})['href']
         url = uploadToFirestore(icon, name, entity)
         fossilInfo = { 
-            db.field_path(name): {
-                u"price": price,
-                u"image": url,
-                u"index": i,
-            }
+            u"price": price,
+            u"image": url,
+            u"index": i,
         }
         print(name, fossilInfo)
-        uploadToFirebase(fossilInfo, entity)
+        uploadToFirebase(fossilInfo, entity, name)
     for i in range(len(multipartEntries)):
         #parse the HTML for multipart entries
         multipartSoup = bs(str(multipartEntries[i]), features="lxml")
@@ -249,14 +246,12 @@ def get_fossil_images(r, entity):
         icon = multipartSoup.find('a', {"class": "image image-thumbnail"})['href']
         url = uploadToFirestore(icon, name, entity)
         fossilInfo = { 
-            db.field_path(name): {
-                u"price": price,
-                u"image": url,
-                u"index": i,
-            }
+            u"price": price,
+            u"image": url,
+            u"index": i,
         }
         print(name, fossilInfo)
-        uploadToFirebase(fossilInfo, entity)
+        uploadToFirebase(fossilInfo, entity, name)
 
 def get_villagers(r, entity): 
     soup = bs(r, features="lxml")
@@ -284,19 +279,17 @@ def get_villagers(r, entity):
         
         url = uploadToFirestore(pic, name, entity)
         villagerInfo = { 
-            db.field_path(name): {
-                u"image": url,
-                u"personality": personality,
-                u"species": species,
-                u"month": month,
-                u"day": day,
-                u"catchphrase": catchphrase,
-                u"hobby": hobby,
-                u"index": i
-            }
+            u"image": url,
+            u"personality": personality,
+            u"species": species,
+            u"month": month,
+            u"day": day,
+            u"catchphrase": catchphrase,
+            u"hobby": hobby,
+            u"index": i
         }
         print(name, villagerInfo)
-        uploadToFirebase(villagerInfo, entity)
+        uploadToFirebase(villagerInfo, entity, name)
 
 f = open('fish.html', 'r')
 #get_images(f, Entity.fish)

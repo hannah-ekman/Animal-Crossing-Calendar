@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter {
+public class InfiniteRecyclerAdapter extends BaseExpandableListAdapter {
 
     private Context _context;
     private List<String> _listDataHeader; // header titles
@@ -44,7 +44,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private int tabColor, buttonOnDrawable, buttonOffDrawable;
     private ArrayList<Button> buttons = new ArrayList<>();
 
-    public ExpandableListAdapter(Context context, List<String> listDataHeader,
+    public InfiniteRecyclerAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, HashMap<String, Boolean>> listChildData,
                                  RecyclerviewAdapter adapter, Map<String, Object> fish, ArrayList<Boolean> isNorth,
                                  Map<String, Object> fishCopy, Map<String, Object> caught, Map<String, Object> donated,

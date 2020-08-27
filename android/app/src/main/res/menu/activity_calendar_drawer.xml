@@ -20,6 +20,10 @@
             android:id="@+id/nav_fossil"
             android:icon="@drawable/fossiliconpng"
             android:title="Fossils" />
+        <item
+            android:id="@+id/nav_villager"
+            android:icon="@drawable/birthdayicon"
+            android:title="Villagers" />
     </group>
 
     <item android:title="Communicate">

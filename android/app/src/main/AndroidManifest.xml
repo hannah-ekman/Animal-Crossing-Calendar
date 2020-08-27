@@ -38,6 +38,10 @@
             android:label="Bug Tracker"
             android:noHistory="false"
             android:theme="@style/AppTheme.NoActionBar"/>
+        <activity android:name=".Villagers"
+            android:label="Villager Tracker"
+            android:noHistory="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".NewProfile"
             android:label="New Profile"
             android:noHistory="false"/>

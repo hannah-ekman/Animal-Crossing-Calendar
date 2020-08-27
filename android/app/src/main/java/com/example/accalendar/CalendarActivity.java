@@ -666,6 +666,9 @@ public class CalendarActivity extends AppCompatActivity
         } else if (id == R.id.profile) {
             Intent intent = new Intent(this, Profile.class);
             startActivity(intent);
+        } else if (id == R.id.nav_villager) {
+            Intent intent = new Intent(this, Villagers.class);
+            startActivity(intent);
         }
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

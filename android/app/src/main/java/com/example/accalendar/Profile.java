@@ -29,6 +29,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -38,6 +41,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -114,6 +118,14 @@ public class Profile extends AppCompatActivity
     private static Bitmap rotateImage = null;
     private static final int GALLERY = 1;
     private DocumentReference userRef;
+    RecyclerviewAdapter residentAdapter, dreamieAdapter;
+    private Map<String, Object> villagers = new HashMap<>();
+    private Map<String, Object> residents = new HashMap<>();
+    private Map<String, Object> dreamies = new HashMap<>();
+    private Map<String, Object> dreamieList = new LinkedHashMap<>();
+    private Map<String, Object> residentList = new LinkedHashMap<>();
+    private boolean residentClicked = false;
+    private boolean dreamieClicked = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -126,6 +138,18 @@ public class Profile extends AppCompatActivity
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
+
+        RecyclerView residentView = findViewById(R.id.resident_grid);
+        int numColumns = 4;
+        residentView.setLayoutManager(new GridLayoutManager(this, numColumns));
+        residentAdapter = setAdapter(residentList);
+        residentView.setAdapter(residentAdapter);
+        RecyclerView dreamieView = findViewById(R.id.dreamie_grid);
+        dreamieView.setLayoutManager(new GridLayoutManager(this, numColumns));
+        dreamieAdapter = setAdapter(dreamieList);
+        dreamieView.setAdapter(dreamieAdapter);
+
+        getVillagers();
 
         profilePic = findViewById(R.id.profilePic);
         final View.OnClickListener profileClick = new View.OnClickListener() {
@@ -230,7 +254,7 @@ public class Profile extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 updateProfile();
-                editButton.setImageResource(android.R.drawable.ic_menu_edit);
+                editButton.setImageResource(R.drawable.ic_edit);
                 name.setInputType(InputType.TYPE_NULL);
                 island.setInputType(InputType.TYPE_NULL);
                 birthday.setOnClickListener(null);
@@ -248,7 +272,7 @@ public class Profile extends AppCompatActivity
                 if (isEdit) {
                     uploadImage();
                     updateInformation();
-                    editButton.setImageResource(android.R.drawable.ic_menu_edit);
+                    editButton.setImageResource(R.drawable.ic_edit);
                     name.setInputType(InputType.TYPE_NULL);
                     island.setInputType(InputType.TYPE_NULL);
                     birthday.setOnClickListener(null);
@@ -258,7 +282,7 @@ public class Profile extends AppCompatActivity
                     isEdit = !isEdit;
                     cancel.setVisibility(View.INVISIBLE);
                 } else {
-                    editButton.setImageResource(android.R.drawable.checkbox_on_background);
+                    editButton.setImageResource(R.drawable.ic_check);
                     name.setInputType(InputType.TYPE_CLASS_TEXT);
                     island.setInputType(InputType.TYPE_CLASS_TEXT);
                     birthday.setOnClickListener(birthdayClick);
@@ -270,6 +294,91 @@ public class Profile extends AppCompatActivity
                 }
             }
         });
+
+        ConstraintLayout residentTab = findViewById(R.id.residentTab);
+        residentTab.setOnClickListener(new ConstraintLayout.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                residentClicked = tabClick(residentClicked, R.id.residentAdd, R.id.displayResidents,
+                        R.id.residentContent);
+            }
+        });
+
+        ConstraintLayout dreamieTab = findViewById(R.id.dreamieTab);
+        dreamieTab.setOnClickListener(new ConstraintLayout.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dreamieClicked = tabClick(dreamieClicked, R.id.dreamieAdd, R.id.displayDreamies,
+                        R.id.dreamieContent);
+            }
+        });
+
+        ImageButton dreamieAdd = findViewById(R.id.dreamieAdd);
+        ImageButton residentAdd = findViewById(R.id.residentAdd);
+        View.OnClickListener addVillager = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Profile.this, Villagers.class);
+                startActivity(intent);
+            }
+        };
+        dreamieAdd.setOnClickListener(addVillager);
+        residentAdd.setOnClickListener(addVillager);
+    }
+
+    @Override
+    public void onResume()
+    {  // After a pause OR at startup
+        super.onResume();
+        getResidents();
+        getDreamies();
+    }
+
+    private boolean tabClick(boolean clicked, int addView, int dropView, int scrollerView) {
+        ImageButton add = findViewById(addView);
+        RelativeLayout scroller = findViewById(scrollerView);
+        ImageView drop = findViewById(dropView);
+        if(clicked) {
+            add.setVisibility(View.INVISIBLE);
+            scroller.setVisibility(View.GONE);
+
+            drop.setRotation(0);
+        } else {
+            add.setVisibility(View.VISIBLE);
+            scroller.setVisibility(View.VISIBLE);
+
+            drop.setRotation(180);
+        }
+        return !clicked;
+    }
+
+    private RecyclerviewAdapter setAdapter(Map<String, Object> map) {
+        ArrayList<ClassUtils.IdKeyPair> idKeyPairs = new ArrayList<>();
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.cardtitle, "name", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.birthday_value, "birthday", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.catchphrase_value, "catchphrase", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.hobby_value, "hobby", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.species_value, "species", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.personality_value, "personality", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.villagerImage, "image", ClassUtils.ViewType.IMAGEVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.gender_value, "gender", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.isResident, "resident",
+                ClassUtils.ViewType.RESIDENTBUTTON, R.drawable.ic_museumicon, R.drawable.ic_whitemuseumicon));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.isDreamie, "dreamie",
+                ClassUtils.ViewType.DREAMIEBUTTON, R.drawable.ic_fishingicon, R.drawable.ic_whitefishingicon));
+
+        ClassUtils.PopupHelper helper = new ClassUtils.PopupHelper(idKeyPairs, R.layout.villager_popup,
+                0, 0, R.drawable.villagerpopup, R.id.fishimg, R.id.resident,
+                R.id.fishconstraint, R.id.fishdonated, 0,0);
+
+
+        DocumentReference residentRef = db.collection("users").document(user.getUid())
+                .collection("villagers").document("island");
+        DocumentReference dreamieRef = db.collection("users").document(user.getUid())
+                .collection("villagers").document("dreamie");
+        return new RecyclerviewAdapter(this, map, null, residents, residentRef,
+                    ClassUtils.ItemType.RESIDENT, helper, dreamies, dreamieRef);
+
     }
 
     private void updateInformation() {
@@ -393,7 +502,7 @@ public class Profile extends AppCompatActivity
         ArrayList<View> buttons = new ArrayList<>();
         Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin_sans_semibold.ttf");
         Button upload = new Button(this);
-        upload.setBackgroundResource(R.drawable.fishclear);
+        upload.setBackgroundResource(R.drawable.profilebutton);
         upload.setText("Upload");
         upload.setTypeface(typeface);
         upload.setTextColor(Color.WHITE);
@@ -414,7 +523,7 @@ public class Profile extends AppCompatActivity
 
         Button remove = new Button(this);
         remove.setText("Remove");
-        remove.setBackgroundResource(R.drawable.fishclear);
+        remove.setBackgroundResource(R.drawable.profilebutton);
         remove.setTypeface(typeface);
         remove.setTextColor(Color.WHITE);
         remove.setOnClickListener(new View.OnClickListener() {
@@ -456,9 +565,9 @@ public class Profile extends AppCompatActivity
                 Button b = new Button(this);
 
                 if (isNorth && vals[i].equals("North") || !isNorth && vals[i].equals("South")) {
-                    b.setBackgroundResource(R.drawable.fish_filter_on_button);
+                    b.setBackgroundResource(R.drawable.roundedorange);
                 } else {
-                    b.setBackgroundResource(R.drawable.fish_filter_off_button);
+                    b.setBackgroundResource(R.drawable.roundedyellow);
                 }
 
                 b.setText(vals[i]);
@@ -475,9 +584,9 @@ public class Profile extends AppCompatActivity
                         for(int i = 0; i<isNorthButtons.size(); i++) {
                             Button b = (Button) isNorthButtons.get(i);
                             if (isNorth && b.getText().equals("North") || !isNorth && b.getText().equals("South")) {
-                                b.setBackgroundResource(R.drawable.fish_filter_on_button);
+                                b.setBackgroundResource(R.drawable.roundedorange);
                             } else {
-                                b.setBackgroundResource(R.drawable.fish_filter_off_button);
+                                b.setBackgroundResource(R.drawable.roundedyellow);
                             }
                         }
                     }
@@ -634,6 +743,86 @@ public class Profile extends AppCompatActivity
         } else if (fruitName.equals("pear")) {
             fruit.setImageResource(R.drawable.ic_pear);
         }
+    }
+
+    private void getResidents() {
+        final DocumentReference docRef = db.collection("users").document(user.getUid())
+                .collection("villagers").document("island");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
+                        residents.clear();
+                        residentList.clear();
+                        residents.putAll(doc.getData());
+                        for(String key : residents.keySet()) {
+                            residentList.put(key, villagers.get(key));
+                            residents.put(key, true);
+                        }
+                        DocSnapToData.sortHashMapByIndex(residentList, "Name");
+                        residentAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void getDreamies() {
+        final DocumentReference docRef = db.collection("users").document(user.getUid())
+                .collection("villagers").document("dreamie");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
+                        dreamies.clear();
+                        dreamieList.clear();
+                        dreamies.putAll(doc.getData());
+                        for(String key : dreamies.keySet()) {
+                            dreamieList.put(key, villagers.get(key));
+                            dreamies.put(key, true);
+                        }
+                        DocSnapToData.sortHashMapByIndex(dreamieList, "Name");
+                        dreamieAdapter.notifyDataSetChanged();
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void getVillagers() {
+        final DocumentReference docRef = db.collection("trackables").document("villagers");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot doc = task.getResult();
+                    if (doc.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
+                        villagers.putAll(doc.getData());
+                        getResidents();
+                        getDreamies();
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
     }
 
     private void getUserInfo() {

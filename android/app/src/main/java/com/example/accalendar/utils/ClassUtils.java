@@ -12,17 +12,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 
+import com.bumptech.glide.Glide;
 import com.example.accalendar.R;
 import com.example.accalendar.adapters.RecyclerviewAdapter;
 import com.example.accalendar.views.MonthView;
 import com.example.accalendar.views.TimeView;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,11 +33,11 @@ import java.util.Map;
 
 public class ClassUtils {
     public enum ItemType {
-        FISH, BUG, FOSSIL, ART
+        FISH, BUG, FOSSIL, ART, VILLAGERS, RESIDENT
     }
 
     public enum ViewType {
-        TEXTVIEW, MONTHVIEW, TIMEVIEW, DONATEDBUTTON, CAUGHTBUTTON
+        TEXTVIEW, MONTHVIEW, TIMEVIEW, DONATEDBUTTON, CAUGHTBUTTON, IMAGEVIEW, DREAMIEBUTTON, RESIDENTBUTTON
     }
 
     // holds the id of the view, the key for the view (used to match to the value of the view), and the type of view
@@ -79,6 +82,43 @@ public class ClassUtils {
         }
     }
 
+    public static class Available {
+        public int start;
+        public int end;
+    }
+
+    public static class Date {
+        public int day;
+        public int month;
+    }
+
+    public static abstract class Trackable {
+        public String name;
+        public String image;
+    }
+
+    public static abstract class Discoverable extends Trackable {
+        public int price;
+    }
+
+    public static abstract class Catchable extends Discoverable {
+        public String location;
+        public ArrayList<Available> north;
+        public ArrayList<Available> south;
+        public ArrayList<Available> times;
+
+        ArrayList<ClassUtils.Available> ParseTimeHash(ArrayList<HashMap<String, Object>> available) {
+            ArrayList<ClassUtils.Available> parsed = new ArrayList<>();
+            for(int i = 0; i < available.size(); i++) {
+                ClassUtils.Available times = new ClassUtils.Available();
+                times.start = ((Long) available.get(i).get("start")).intValue();
+                times.end = ((Long) available.get(i).get("end")).intValue();
+                parsed.add(times);
+            }
+            return parsed;
+        }
+    }
+
     // handles inflating the popup and contains other useful info for the recyclerview
     // keeps all the ids of each view (R.id.blank) in a layout to fill in the popup later
     public static class PopupHelper {
@@ -88,9 +128,11 @@ public class ClassUtils {
         final int notCaughtId;
         final int mainViewBg;
         final int imageView;
+        int residentView = 0;
         final int constraintView;
         int donatedId;
         int donatedIcon;
+        int dreamieIcon;
 
         public PopupHelper(ArrayList<IdKeyPair> idKeyPairs, int mainView, int caughtId, int notCaughtId,
                            int mainViewBg, int imageView, int constraintView, int donatedId, int donatedIcon) {
@@ -105,12 +147,34 @@ public class ClassUtils {
             this.donatedIcon = donatedIcon;
         }
 
+        public PopupHelper(ArrayList<IdKeyPair> idKeyPairs, int mainView, int caughtId, int notCaughtId,
+                           int mainViewBg, int imageView, int residentView, int constraintView, int donatedId,
+                           int donatedIcon, int dreamieIcon) {
+            this.idKeyPairs = idKeyPairs;
+            this.mainView = mainView;
+            this.caughtId = caughtId;
+            this.notCaughtId = notCaughtId;
+            this.mainViewBg = mainViewBg;
+            this.imageView = imageView;
+            this.residentView = residentView;
+            this.constraintView = constraintView;
+            this.donatedId = donatedId;
+            this.donatedIcon = donatedIcon;
+            this.dreamieIcon = dreamieIcon;
+        }
+
         public ArrayList<IdKeyPair> getIdKeyPairs() {
             return idKeyPairs;
         }
 
         public int getImageView() {
             return imageView;
+        }
+
+        public int getResidentView() { return residentView; }
+
+        public int getDreamieIcon() {
+            return dreamieIcon;
         }
 
         public int getConstraintView() {
@@ -135,9 +199,10 @@ public class ClassUtils {
 
         // inflates the popup and fills the views
         public void fillViews(LayoutInflater mInflater, final HashMap<String, Object> keyValuePairs,
-                              final Map<String, Object> caught, final DocumentReference docRef,
-                              final RecyclerviewAdapter.ViewHolder holder, final Context context,
-                              final DocumentReference donatedRef, final Map<String, Object> donated) {
+                               final Map<String, Object> caught, final DocumentReference docRef,
+                               final RecyclerviewAdapter.ViewHolder holder, final Context context,
+                               final DocumentReference donatedRef, final Map<String, Object> donated,
+                               final Object month, final Object day) {
             View popView = mInflater.inflate(mainView, null);
             // go through each id we need to fill
             for(int i = 0; i < idKeyPairs.size(); i++) {
@@ -153,8 +218,8 @@ public class ClassUtils {
                         text.setText((String) value);
                         break;
                     case MONTHVIEW:
-                        MonthView month = popView.findViewById(viewId);
-                        month.setMonths((boolean[]) value);
+                        MonthView months = popView.findViewById(viewId);
+                        months.setMonths((boolean[]) value);
                         break;
                     case TIMEVIEW:
                         TimeView times = popView.findViewById(viewId);
@@ -162,77 +227,82 @@ public class ClassUtils {
                         break;
                     case CAUGHTBUTTON:
                         final ImageButton button = popView.findViewById(viewId);
-                        if ((Boolean) value) {
-                            Drawable d = ResourcesCompat.getDrawable(
-                                    context.getResources(), idKeyPair.getSelectedBG(), null);
-                            button.setBackground(d);
-                        } else {
-                            Drawable d = ResourcesCompat.getDrawable(
-                                    context.getResources(), idKeyPair.getUnselectedBG(), null);
-                            button.setBackground(d);
-                        }
-                        button.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                String name = (String) keyValuePairs.get("name");
-                                Map<String, Object> checked = new HashMap<>();
-                                boolean isChecked = !(Boolean) caught.get(name);
-                                caught.put(name, isChecked);
-                                checked.put(name, isChecked);
-                                docRef.update(checked);
-                                if (isChecked) {
-                                    holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, caughtId));
-                                    Drawable d = ResourcesCompat.getDrawable(
-                                            context.getResources(), idKeyPair.getSelectedBG(), null);
-                                    view.setBackground(d);
-                                } else {
-                                    holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, notCaughtId));
-                                    Drawable d = ResourcesCompat.getDrawable(
-                                            context.getResources(), idKeyPair.getUnselectedBG(), null);
-                                    view.setBackground(d);
-                                }
-                            }
-                        });
+                        setButtonOnClick(button, caught, docRef, (Boolean) value, context,
+                                idKeyPair, keyValuePairs.get("name").toString(), month, day,
+                                holder.myConstraintLayout, caughtId, notCaughtId, false);
                         break;
                     case DONATEDBUTTON:
                         final ImageButton donateButton = popView.findViewById(viewId);
-                        if ((Boolean) value) {
-                            Drawable d = ResourcesCompat.getDrawable(
-                                    context.getResources(), idKeyPair.getSelectedBG(), null);
-                            donateButton.setBackground(d);
-                        } else {
-                            Drawable d = ResourcesCompat.getDrawable(
-                                    context.getResources(), idKeyPair.getUnselectedBG(), null);
-                            donateButton.setBackground(d);
-                        }
-                        donateButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                String name = (String) keyValuePairs.get("name");
-                                Map<String, Object> checked = new HashMap<>();
-                                boolean isChecked = !(Boolean) donated.get(name);
-                                donated.put(name, isChecked);
-                                checked.put(name, isChecked);
-                                donatedRef.update(checked);
-                                if (isChecked) {
-                                    holder.donatedView.setImageResource(donatedIcon);
-                                    Drawable d = ResourcesCompat.getDrawable(
-                                            context.getResources(), idKeyPair.getSelectedBG(), null);
-                                    view.setBackground(d);
-                                } else {
-                                    holder.donatedView.setImageResource(0);
-                                    Drawable d = ResourcesCompat.getDrawable(
-                                            context.getResources(), idKeyPair.getUnselectedBG(), null);
-                                    view.setBackground(d);
-                                }
-                            }
-                        });
+                        setButtonOnClick(donateButton, donated, donatedRef, (Boolean) value, context,
+                                idKeyPair, keyValuePairs.get("name").toString(), month, day,
+                                holder.donatedView, donatedIcon, 0,false);
+                        break;
+                    case IMAGEVIEW:
+                        final ImageView image = popView.findViewById(viewId);
+                        Glide.with(context).load(value).into(image);
+                        break;
+                    case DREAMIEBUTTON:
+                        final ImageButton dreamieButton = popView.findViewById(viewId);
+                        setButtonOnClick(dreamieButton, donated, donatedRef, (Boolean) value, context,
+                                idKeyPair, keyValuePairs.get("name").toString(), month, day,
+                                holder.donatedView, dreamieIcon, 0, false);
+                        break;
+                    case RESIDENTBUTTON:
+                        final ImageButton residentButton = popView.findViewById(viewId);
+                        setButtonOnClick(residentButton, caught, docRef, (Boolean) value, context,
+                                idKeyPair, keyValuePairs.get("name").toString(), month, day,
+                                holder.residentView, donatedIcon, 0, true);
                         break;
                     default:
                         break;
 
                 }
             }
+            displayPopUp(popView, context);
+        }
+
+        public void fillViews(LayoutInflater mInflater, final HashMap<String, Object> keyValuePairs,
+                              final Context context) {
+            View popView = mInflater.inflate(mainView, null);
+            // go through each id we need to fill
+            for(int i = 0; i < idKeyPairs.size(); i++) {
+                final IdKeyPair idKeyPair = idKeyPairs.get(i);
+                // get the corresponding value for the current key
+                Object value = keyValuePairs.get(idKeyPair.getKey());
+                int viewId = idKeyPair.getId();
+                ViewType type = idKeyPair.getType();
+                // depending on the type we handle it differently
+                switch (type) {
+                    case TEXTVIEW:
+                        TextView text = popView.findViewById(viewId);
+                        text.setText((String) value);
+                        break;
+                    case MONTHVIEW:
+                        MonthView months = popView.findViewById(viewId);
+                        months.setMonths((boolean[]) value);
+                        break;
+                    case TIMEVIEW:
+                        TimeView times = popView.findViewById(viewId);
+                        times.setTimes((int[]) value);
+                        break;
+                    case IMAGEVIEW:
+                        final ImageView image = popView.findViewById(viewId);
+                        Glide.with(context).load(value).into(image);
+                        break;
+                    case DREAMIEBUTTON:
+                    case RESIDENTBUTTON:
+                        final ImageButton button = popView.findViewById(viewId);
+                        button.setVisibility(View.GONE);
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+            displayPopUp(popView, context);
+        }
+
+        public void displayPopUp(View popView, Context context) {
             popView.setBackground(ContextCompat.getDrawable(context, mainViewBg));
             DisplayMetrics metrics = context.getResources().getDisplayMetrics(); // used to convert px to dp
             PopupWindow popWindow = new PopupWindow(popView, metrics.widthPixels,
@@ -242,6 +312,52 @@ public class ClassUtils {
             }
             popWindow.setAnimationStyle(R.style.PopUpWindow_Animation);
             popWindow.showAtLocation(popView, Gravity.CENTER, 0, 0);
+        }
+
+        public void setButtonOnClick(ImageButton b, final Map<String, Object> docData, final DocumentReference docRef,
+                                     Boolean value, final Context context, final IdKeyPair idKeyPair, final String name,
+                                     final Object month, final Object day, final View bg, final int icon, final int unIcon,
+                                     final boolean isSpecial) {
+            if (value) {
+                Drawable d = ResourcesCompat.getDrawable(
+                        context.getResources(), idKeyPair.getSelectedBG(), null);
+                b.setBackground(d);
+            } else {
+                Drawable d = ResourcesCompat.getDrawable(
+                        context.getResources(), idKeyPair.getUnselectedBG(), null);
+                b.setBackground(d);
+            }
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Map<String, Object> checked = new HashMap<>();
+                    boolean isChecked = !(Boolean) docData.get(name);
+                    docData.put(name, isChecked);
+                    if (isChecked && isSpecial) {
+                        checked.put(name, new HashMap<String, Object>() {{
+                            put("month", month);
+                            put("day", day);
+                        }});
+                    } else if (isChecked)
+                        checked.put(name, true);
+                    else if (isSpecial)
+                        checked.put(name, FieldValue.delete());
+                    else
+                        checked.put(name, false);
+                    docRef.update(checked);
+                    if (isChecked) {
+                        bg.setBackgroundResource(icon);
+                        Drawable d = ResourcesCompat.getDrawable(
+                                context.getResources(), idKeyPair.getSelectedBG(), null);
+                        view.setBackground(d);
+                    } else {
+                        bg.setBackgroundResource(unIcon);
+                        Drawable d = ResourcesCompat.getDrawable(
+                                context.getResources(), idKeyPair.getUnselectedBG(), null);
+                        view.setBackground(d);
+                    }
+                }
+            });
         }
     }
 

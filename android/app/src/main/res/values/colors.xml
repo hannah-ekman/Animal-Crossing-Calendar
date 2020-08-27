@@ -26,5 +26,8 @@
     <color name="bugBackground">#b4e699</color>
     <color name="notCaughtbug">#c9edbf</color>
     <color name="bugtoolbar">#458137</color>
+    <color name="profiletoolbar">#ffe079</color>
+    <color name="profileBackground">#fff6cd</color>
+    <color name="profileText">#ffbc5f</color>
 </resources>
 
