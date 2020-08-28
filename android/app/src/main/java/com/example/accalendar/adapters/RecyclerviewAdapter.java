@@ -1,6 +1,7 @@
 package com.example.accalendar.adapters;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
@@ -29,7 +30,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.accalendar.R;
+import com.example.accalendar.utils.Art;
+import com.example.accalendar.utils.Bug;
 import com.example.accalendar.utils.ClassUtils;
+import com.example.accalendar.utils.Fish;
+import com.example.accalendar.utils.Fossil;
+import com.example.accalendar.utils.Villager;
 import com.example.accalendar.views.MonthView;
 import com.example.accalendar.views.TimeView;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -47,8 +53,7 @@ import java.util.Map;
 
 public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapter.ViewHolder> {
     private static final String TAG = "Recyclerview";
-    private final Map<String, Object> items;
-    private ArrayList<String> keys;
+    private final ArrayList<Object> items;
     private LayoutInflater mInflater;
     private final Context context;
     private final ArrayList<Boolean> isNorth;
@@ -62,13 +67,12 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     private Map<String, Object> dreamie;
     private DocumentReference dreamieRef;
 
-    public RecyclerviewAdapter(Context context, Map<String, Object> fish, ArrayList<Boolean> isNorth,
+    public RecyclerviewAdapter(Context context, ArrayList<Object> items, ArrayList<Boolean> isNorth,
                                Map<String, Object> caught, DocumentReference docRef,
                                ClassUtils.ItemType itemType, ClassUtils.PopupHelper helper,
                                Map<String, Object> donated, DocumentReference donatedRef) {
         this.mInflater = LayoutInflater.from(context);
-        this.items = fish;
-        this.keys = new ArrayList<>(items.keySet());
+        this.items = items;
         this.context = context;
         this.isNorth = isNorth;
         this.docRef = docRef;
@@ -103,165 +107,86 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
     //original post used textview, so I need to hammer this part out
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
-        this.keys = new ArrayList<>(items.keySet());
-        final String name = keys.get(position);
-        final Map<String, Object> entry = (Map<String, Object>) items.get(keys.get(position));
-        String url = "";
-        if(entry.containsKey("image"))
-            url = (String) entry.get("image");
-        //Picasso.get().setLoggingEnabled(true);
-        //Picasso.get().load(url).fit().centerCrop().into(holder.myImageView);
-        //Glide.with(holder.itemView.getContext()).load(url).centerCrop().into(holder.myImageView);
-        Glide.with(context)
-                .load(url)
-                .dontAnimate()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .skipMemoryCache(true)
-                .encodeFormat(Bitmap.CompressFormat.PNG)
-                .thumbnail(0.05f)
-                .dontTransform()
-                .centerCrop()
-                .into(holder.myImageView);
+        final ClassUtils.Trackable t = (ClassUtils.Trackable) items.get(position);
+        glide(t.image, holder.myImageView);
 
-        ArrayList<Map<String, Long>> months;
-        int[] timeBools = null;
-        boolean[] monthBools = null;
-        //Only want to fill time/months if the type is fish or bug
-        if (itemType == ClassUtils.ItemType.FISH || itemType == ClassUtils.ItemType.BUG) {
-            timeBools = fillTimeBools((ArrayList<Map<String, Long>>) entry.get("times"));
-            if (isNorth.get(0)) {
-                months = ((ArrayList<Map<String, Long>>) entry.get("north"));
-            } else {
-                months = ((ArrayList<Map<String, Long>>) entry.get("south"));
-            }
-            monthBools = fillMonthBools(months);
-        }
         if (caught != null) {
-            if (caught.containsKey(name) && (Boolean) caught.get(name)) {
+            if (caught.containsKey(t.name) && (Boolean) caught.get(t.name)) {
                 holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, helper.getCaughtId()));
             } else {
-                caught.put(name, false);
+                caught.put(t.name, false);
                 holder.myConstraintLayout.setBackground(ContextCompat.getDrawable(context, helper.getNotCaughtId()));
             }
         }
 
         if (donated != null) {
-            if (donated.containsKey(name) && (Boolean) donated.get(name)) {
-                Glide.with(context)
-                        .load(helper.getDonatedIcon())
-                        .dontAnimate()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .skipMemoryCache(true)
-                        .encodeFormat(Bitmap.CompressFormat.PNG)
-                        .thumbnail(0.05f)
-                        .centerCrop()
-                        .into(holder.donatedView);
+            if (donated.containsKey(t.name) && (Boolean) donated.get(t.name)) {
+                glide(helper.getDonatedIcon(), holder.donatedView);
             } else {
-                donated.put(name, false);
-                Glide.with(context)
-                        .load(R.drawable.transparent)
-                        .dontAnimate()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .skipMemoryCache(true)
-                        .encodeFormat(Bitmap.CompressFormat.PNG)
-                        .thumbnail(0.05f)
-                        .centerCrop()
-                        .into(holder.donatedView);
+                donated.put(t.name, false);
+                glide(R.drawable.transparent, holder.donatedView);
             }
         }
 
         if (resident != null) {
-            if (resident.containsKey(name) && (Boolean) resident.get(name)) {
-                Glide.with(context)
-                        .load(helper.getDonatedIcon())
-                        .dontAnimate()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .skipMemoryCache(true)
-                        .encodeFormat(Bitmap.CompressFormat.PNG)
-                        .thumbnail(0.05f)
-                        .centerCrop()
-                        .into(holder.residentView);
+            if (resident.containsKey(t.name) && (Boolean) resident.get(t.name)) {
+                glide(helper.getDonatedIcon(), holder.residentView);
             } else {
-                resident.put(name, false);
-                Glide.with(context)
-                        .load(R.drawable.transparent)
-                        .dontAnimate()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .skipMemoryCache(true)
-                        .encodeFormat(Bitmap.CompressFormat.PNG)
-                        .thumbnail(0.05f)
-                        .centerCrop()
-                        .into(holder.residentView);
+                resident.put(t.name, false);
+                glide(R.drawable.transparent, holder.residentView);
             }
         }
 
         if (dreamie != null) {
-            if (dreamie.containsKey(name) && (Boolean) dreamie.get(name)) {
-                Glide.with(context)
-                        .load(helper.getDreamieIcon())
-                        .dontAnimate()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .skipMemoryCache(true)
-                        .encodeFormat(Bitmap.CompressFormat.PNG)
-                        .thumbnail(0.05f)
-                        .centerCrop()
-                        .into(holder.donatedView);
+            if (dreamie.containsKey(t.name) && (Boolean) dreamie.get(t.name)) {
+                glide(helper.getDreamieIcon(), holder.donatedView);
             } else {
-                dreamie.put(name, false);
-                Glide.with(context)
-                        .load(R.drawable.transparent)
-                        .dontAnimate()
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .skipMemoryCache(true)
-                        .encodeFormat(Bitmap.CompressFormat.PNG)
-                        .thumbnail(0.05f)
-                        .centerCrop()
-                        .into(holder.donatedView);
+                dreamie.put(t.name, false);
+                glide(R.drawable.transparent, holder.donatedView);
             }
         }
-
-        final int[] finalTimeBools = timeBools;
-        final boolean[] finalMonthBools = monthBools;
         holder.myImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // fill popup with corresponding fish info
-                Log.d(TAG, "onClick: clicked on: " + name);
-
-                ArrayList<ClassUtils.IdKeyPair> idKeyPairs = helper.getIdKeyPairs();
+                Log.d(TAG, "onClick: clicked on: " + t.name);
 
                 // fill values for each view we are inflating
                 HashMap<String, Object> keyValuePairs = new HashMap<>();
-                for (int i = 0; i < idKeyPairs.size(); i++) {
-                    ClassUtils.IdKeyPair idKeyPair = idKeyPairs.get(i);
-                    String key = idKeyPair.getKey();
-                    if (key.equals("name"))
-                        keyValuePairs.put(key, name);
-                    else if (key.equals("checkbox"))
-                        keyValuePairs.put(key, caught.get(name));
-                    else if (key.equals("donated"))
-                        keyValuePairs.put(key, donated.get(name));
-                    else if (key.equals("months"))
-                        keyValuePairs.put(key, finalMonthBools);
-                    else if (key.equals("times"))
-                        keyValuePairs.put(key, finalTimeBools);
-                    else if (key.equals("price"))
-                        keyValuePairs.put(key, ((Long) entry.get(key)).toString());
-                    else if (key.equals("birthday"))
-                        keyValuePairs.put(key, fillBirthday(entry));
-                    else if (key.equals("resident"))
-                        keyValuePairs.put(key, resident.get(name));
-                    else if (key.equals("dreamie"))
-                        keyValuePairs.put(key, dreamie.get(name));
-                    else
-                        keyValuePairs.put(idKeyPair.getKey(), entry.get(idKeyPair.getKey()));
+
+                if (t instanceof ClassUtils.Discoverable) {
+                    keyValuePairs.put("checkbox", caught.get(t.name));
+                    keyValuePairs.put("donated", donated.get(t.name));
+                    switch (itemType){
+                        case ART:
+                            ((Art) t).fillKeyValues(keyValuePairs);
+                            break;
+                        case BUG:
+                            ((Bug) t).fillKeyValues(keyValuePairs, isNorth.get(0));
+                            break;
+                        case FISH:
+                            ((Fish) t).fillKeyValues(keyValuePairs, isNorth.get(0));
+                            break;
+                        case FOSSIL:
+                            ((Fossil) t).fillKeyValues(keyValuePairs);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (t instanceof Villager) {
+                    keyValuePairs.put("resident", resident.get(t.name));
+                    keyValuePairs.put("dreamie", dreamie.get(t.name));
+                    ((Villager) t).fillKeyValues(keyValuePairs);
                 }
 
                 // pass to the helper to handle the inflate for us
-                if (itemType == ClassUtils.ItemType.VILLAGERS)
+                if (itemType == ClassUtils.ItemType.VILLAGERS) {
+                    Villager v = (Villager) t;
                     helper.fillViews(mInflater, keyValuePairs, resident, docRef, holder, context,
-                            dreamieRef, dreamie, entry.get("month"), entry.get("day"));
-                else if (itemType == ClassUtils.ItemType.RESIDENT)
+                            dreamieRef, dreamie, v.birthday.month , v.birthday.day);
+                } else if (itemType == ClassUtils.ItemType.RESIDENT)
                     helper.fillViews(mInflater, keyValuePairs, context);
                 else
                     helper.fillViews(mInflater, keyValuePairs, caught, docRef, holder, context,
@@ -270,71 +195,52 @@ public class RecyclerviewAdapter extends RecyclerView.Adapter<RecyclerviewAdapte
         });
     }
 
-    @Override
-    public long getItemId(int position) {
-        if (keys.size() > 0)
-            return keys.get(position).hashCode();
-        else
-            return 0;
+    private void glide(int d, ImageView v) {
+        Glide.with(context)
+                .load(d)
+                .dontAnimate()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .skipMemoryCache(true)
+                .encodeFormat(Bitmap.CompressFormat.PNG)
+                .thumbnail(0.5f)
+                .centerCrop()
+                .into(v);
     }
 
-    private String fillBirthday(Map<String, Object> entry) {
-        return entry.get("month") + "/" + entry.get("day");
+    private void glide(String s, ImageView v) {
+        Glide.with(context)
+                .load(s)
+                .dontAnimate()
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .skipMemoryCache(true)
+                .encodeFormat(Bitmap.CompressFormat.PNG)
+                .thumbnail(0.05f)
+                .centerCrop()
+                .into(v);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        if (items.size() > 0)
+            return items.get(position).hashCode();
+        return 0;
     }
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
         super.onViewRecycled(holder);
-        Glide.with(context).clear(holder.residentView);
-        Glide.with(context).clear(holder.donatedView);
-        Glide.with(context).clear(holder.myImageView);
+        if (holder.residentView != null)
+            Glide.with(context).clear(holder.residentView);
+        if (holder.donatedView != null)
+            Glide.with(context).clear(holder.donatedView);
+        if (holder.myImageView != null)
+            Glide.with(context).clear(holder.myImageView);
     }
 
     @Override
     public int getItemViewType(int position) {
         return position;
     }
-
-    private boolean[] fillMonthBools(ArrayList<Map<String, Long>> months) {
-        int monthStart, monthEnd;
-        boolean[] monthBools = new boolean[12];
-        for (int i = 0; i < 12; i++)
-            monthBools[i] = false;
-        for (int monthIdx = 0; monthIdx < months.size(); monthIdx++) {
-            Map<String, Long> month = months.get(monthIdx);
-            monthStart = month.get("start").intValue();
-            monthEnd = month.get("end").intValue();
-            for (int i = monthStart; i <= monthEnd; i++)
-                monthBools[i - 1] = true;
-        }
-        return monthBools;
-    }
-
-    // Sets the times the fish is available to 1 and the rest to 0 -> used in the TimeView
-    private int[] fillTimeBools(ArrayList<Map<String, Long>> times) {
-        int startTime, endTime;
-        int[] timeBools = new int[25];
-        for (int i = 0; i < 25; i++)
-            timeBools[i] = 0;
-        // Iterate through each time in the array (this was to deal with the piranha lol)
-        for (int timeIdx = 0; timeIdx < times.size(); timeIdx++) {
-            Map<String, Long> time = times.get(timeIdx);
-            startTime = time.get("start").intValue();
-            endTime = time.get("end").intValue();
-            // If startTime is before endTime -> fill all times from start to end with 1
-            if (startTime <= endTime) {
-                for (int i = startTime; i <= endTime; i++)
-                    timeBools[i] = 1;
-            } else { // start is after end -> fill all times before start and times after end with 1
-                for (int i = 0; i <= endTime; i++)
-                    timeBools[i] = 1;
-                for (int i = startTime; i < 25; i++)
-                    timeBools[i] = 1;
-            }
-        }
-        return timeBools;
-    }
-
     //total number of cells
     // We have to define getItemCount since it's abstract
     @Override

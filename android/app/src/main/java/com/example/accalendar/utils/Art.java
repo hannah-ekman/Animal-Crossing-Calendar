@@ -1,5 +1,6 @@
 package com.example.accalendar.utils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 // need to add selling price/cost to buy
@@ -20,6 +21,21 @@ public class Art extends ClassUtils.Discoverable {
         } else {
             this.hasFake = false;
         }
+    }
+
+    @Override
+    public void fillKeyValues(HashMap<String, Object> values) {
+        super.fillKeyValues(values);
+        values.put("cost", cost);
+        values.put("fake", fake);
+        values.put("tip", tip);
+    }
+
+    public String get(String value) {
+        if ("Has Fakes".equals(value)) {
+            return hasFake ? "Yes" : "No";
+        }
+        return null;
     }
 
 }

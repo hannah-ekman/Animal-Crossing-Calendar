@@ -30,11 +30,11 @@
         <activity android:name=".login"
             android:label="Log In"
             android:noHistory="false"/>
-        <activity android:name=".Fish"
+        <activity android:name=".FishActivity"
             android:label="Fish Tracker"
             android:noHistory="false"
             android:theme="@style/AppTheme.NoActionBar"/>
-        <activity android:name=".Bug"
+        <activity android:name=".BugActivity"
             android:label="Bug Tracker"
             android:noHistory="false"
             android:theme="@style/AppTheme.NoActionBar"/>

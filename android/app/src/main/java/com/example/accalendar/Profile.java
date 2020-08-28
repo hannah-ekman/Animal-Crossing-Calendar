@@ -3,7 +3,6 @@ package com.example.accalendar;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,15 +12,10 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -29,21 +23,15 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.RotateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -51,20 +39,15 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.accalendar.adapters.ExpandableListAdapter;
 import com.example.accalendar.adapters.ListAdapter;
 import com.example.accalendar.adapters.RecyclerviewAdapter;
 import com.example.accalendar.utils.ClassUtils;
-import com.example.accalendar.utils.DocSnapToData;
-import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -83,16 +66,11 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import org.threeten.bp.LocalDate;
-import org.threeten.bp.temporal.ChronoUnit;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Profile extends AppCompatActivity
@@ -122,8 +100,8 @@ public class Profile extends AppCompatActivity
     private Map<String, Object> villagers = new HashMap<>();
     private Map<String, Object> residents = new HashMap<>();
     private Map<String, Object> dreamies = new HashMap<>();
-    private Map<String, Object> dreamieList = new LinkedHashMap<>();
-    private Map<String, Object> residentList = new LinkedHashMap<>();
+    private ArrayList<Object> dreamieList = new ArrayList<>();
+    private ArrayList<Object> residentList = new ArrayList<>();
     private boolean residentClicked = false;
     private boolean dreamieClicked = false;
 
@@ -352,7 +330,7 @@ public class Profile extends AppCompatActivity
         return !clicked;
     }
 
-    private RecyclerviewAdapter setAdapter(Map<String, Object> map) {
+    private RecyclerviewAdapter setAdapter(ArrayList<Object> items) {
         ArrayList<ClassUtils.IdKeyPair> idKeyPairs = new ArrayList<>();
         idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.cardtitle, "name", ClassUtils.ViewType.TEXTVIEW));
         idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.birthday_value, "birthday", ClassUtils.ViewType.TEXTVIEW));
@@ -376,7 +354,7 @@ public class Profile extends AppCompatActivity
                 .collection("villagers").document("island");
         DocumentReference dreamieRef = db.collection("users").document(user.getUid())
                 .collection("villagers").document("dreamie");
-        return new RecyclerviewAdapter(this, map, null, residents, residentRef,
+        return new RecyclerviewAdapter(this, items, null, residents, residentRef,
                     ClassUtils.ItemType.RESIDENT, helper, dreamies, dreamieRef);
 
     }
@@ -660,7 +638,7 @@ public class Profile extends AppCompatActivity
     }
 
     private void hideKeyboard(View view) {
-        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Fish.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(FishActivity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
@@ -759,10 +737,10 @@ public class Profile extends AppCompatActivity
                         residentList.clear();
                         residents.putAll(doc.getData());
                         for(String key : residents.keySet()) {
-                            residentList.put(key, villagers.get(key));
+                            //residentList.put(key, villagers.get(key));
                             residents.put(key, true);
                         }
-                        DocSnapToData.sortHashMapByIndex(residentList, "Name");
+                        //DocSnapToData.sortHashMapByIndex(residentList, "Name");
                         residentAdapter.notifyDataSetChanged();
                     } else {
                         Log.d(TAG, "No such document");
@@ -788,10 +766,10 @@ public class Profile extends AppCompatActivity
                         dreamieList.clear();
                         dreamies.putAll(doc.getData());
                         for(String key : dreamies.keySet()) {
-                            dreamieList.put(key, villagers.get(key));
+                            //dreamieList.put(key, villagers.get(key));
                             dreamies.put(key, true);
                         }
-                        DocSnapToData.sortHashMapByIndex(dreamieList, "Name");
+                        //DocSnapToData.sortHashMapByIndex(dreamieList, "Name");
                         dreamieAdapter.notifyDataSetChanged();
                     } else {
                         Log.d(TAG, "No such document");
@@ -881,10 +859,10 @@ public class Profile extends AppCompatActivity
             Intent intent = new Intent(this, CalendarActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_bug) {
-            Intent intent = new Intent(this, Bug.class);
+            Intent intent = new Intent(this, BugActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_fish) {
-            Intent intent = new Intent(this, Fish.class);
+            Intent intent = new Intent(this, FishActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_fossil) {
 

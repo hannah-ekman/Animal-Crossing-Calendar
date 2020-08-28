@@ -1,6 +1,5 @@
 package com.example.accalendar;
 
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
@@ -27,9 +26,9 @@ import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -39,8 +38,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.accalendar.adapters.ExpandableListAdapter;
+import com.example.accalendar.adapters.RecyclerviewAdapter;
+import com.example.accalendar.utils.Bug;
 import com.example.accalendar.utils.ClassUtils;
-import com.example.accalendar.utils.DocSnapToData;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -60,21 +61,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.example.accalendar.adapters.ExpandableListAdapter;
-import com.example.accalendar.adapters.RecyclerviewAdapter;
-
-public class Fish extends AppCompatActivity
+public class BugActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     RecyclerviewAdapter adapter;
     ExpandableListAdapter listAdapter;
     private FirebaseFirestore db;
-    private Map<String, Object> fish = new LinkedHashMap<>();
-    private Map<String, Object> fishCopy = new LinkedHashMap<>();
+    private ArrayList<Object> bug = new ArrayList<>();
+    private ArrayList<Object> bugCopy = new ArrayList<>();
     private ArrayList<Boolean> isNorth = new ArrayList<>();
     private Map<String, Object> caught = new HashMap<>();
     private Map<String, Object> donated = new HashMap<>();
-    private static final String TAG = "fish";
+    private static final String TAG = "bug";
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private ExpandableListView list_view;
@@ -85,20 +83,20 @@ public class Fish extends AppCompatActivity
     private GoogleSignInClient mGoogleSignInClient;
     private int listHeight = 0;
     Drawable search;
-    private HashMap<String, Boolean> locations, shadow, times, months, caughtFilter;
+    private HashMap<String, Boolean> locations, times, months, caughtFilter;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fish);
+        setContentView(R.layout.activity_bug);
         db = FirebaseFirestore.getInstance();
-        RecyclerView recyclerView = findViewById(R.id.fish_grid);
+        RecyclerView recyclerView = findViewById(R.id.bug_grid);
         int numColumns = 4;
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         isNorth.add(false);
-        getFish();
+        getbug();
         getUserInfo();
         recyclerView.setLayoutManager(new GridLayoutManager(this, numColumns));
         setAdapter();
@@ -136,7 +134,7 @@ public class Fish extends AppCompatActivity
                 if (listAdapter == null) {
                     createListData(null);
                 }
-                    listAdapter.search(editText.getText().toString());
+                listAdapter.search(editText.getText().toString());
             }
         });
 
@@ -232,7 +230,7 @@ public class Fish extends AppCompatActivity
 
     private void inflateFilter() {
         LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popView = layoutInflater.inflate(R.layout.filter_popup, null);
+        View popView = layoutInflater.inflate(R.layout.bug_filter_popup, null);
         list_view = (ExpandableListView) popView.findViewById(R.id.filter);
 
         Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/josefin_sans_semibold.ttf");
@@ -240,7 +238,7 @@ public class Fish extends AppCompatActivity
         filter.setTypeface(typeface);
         TextView sort = popView.findViewById(R.id.sortby);
         sort.setTypeface(typeface);
-        Button clear = popView.findViewById(R.id.clearfish);
+        Button clear = popView.findViewById(R.id.clearbug);
         //adjust button size to match the filter buttons' sizes
         clear.setMinHeight(0);
         int px = (int) TypedValue.applyDimension(
@@ -304,26 +302,25 @@ public class Fish extends AppCompatActivity
     private void setAdapter() {
         ArrayList<ClassUtils.IdKeyPair> idKeyPairs = new ArrayList<>();
         idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.cardtitle, "name", ClassUtils.ViewType.TEXTVIEW));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_price_value, "price", ClassUtils.ViewType.TEXTVIEW));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_shadow_value, "shadow size", ClassUtils.ViewType.TEXTVIEW));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_location_value, "location", ClassUtils.ViewType.TEXTVIEW));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_months, "months", ClassUtils.ViewType.MONTHVIEW));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.fish_times, "times", ClassUtils.ViewType.TIMEVIEW));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.donatedfish, "donated",
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.bug_price_value, "price", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.bug_location_value, "location", ClassUtils.ViewType.TEXTVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.bug_months, "months", ClassUtils.ViewType.MONTHVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.bug_times, "times", ClassUtils.ViewType.TIMEVIEW));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.donatedbug, "donated",
                 ClassUtils.ViewType.DONATEDBUTTON, R.drawable.ic_museumicon, R.drawable.ic_whitemuseumicon));
-        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.caughtfish, "checkbox",
-                ClassUtils.ViewType.CAUGHTBUTTON, R.drawable.ic_fishingicon, R.drawable.ic_whitefishingicon));
+        idKeyPairs.add(new ClassUtils.IdKeyPair(R.id.caughtbug, "checkbox",
+                ClassUtils.ViewType.CAUGHTBUTTON, R.drawable.ic_caughtbugicon, R.drawable.ic_notcaughtbugicon));
 
-        ClassUtils.PopupHelper helper = new ClassUtils.PopupHelper(idKeyPairs, R.layout.fish_popup,
-                R.drawable.caught_fish, R.drawable.missing_card, R.drawable.fishpopup, R.id.fishimg,
+        ClassUtils.PopupHelper helper = new ClassUtils.PopupHelper(idKeyPairs, R.layout.bug_popup,
+                R.drawable.caught_bug, R.drawable.missing_card, R.drawable.bugpopup, R.id.fishimg,
                 R.id.fishconstraint, R.id.fishdonated, R.drawable.caught);
 
 
-        DocumentReference fishRef = db.collection("users").document(user.getUid())
-                .collection("fish").document("caught");
+        DocumentReference bugRef = db.collection("users").document(user.getUid())
+                .collection("bug").document("caught");
         DocumentReference donatedRef = db.collection("users").document(user.getUid())
-                .collection("fish").document("donated");
-        adapter = new RecyclerviewAdapter(this, fish, isNorth, caught, fishRef, ClassUtils.ItemType.FISH,
+                .collection("bug").document("donated");
+        adapter = new RecyclerviewAdapter(this, bug, isNorth, caught, bugRef, ClassUtils.ItemType.BUG,
                 helper, donated, donatedRef);
     }
 
@@ -377,9 +374,9 @@ public class Fish extends AppCompatActivity
             button.setTextColor(Color.WHITE);
             boolean tf = sort.get(key);
             if (tf)
-                button.setBackground(getResources().getDrawable(R.drawable.fish_filter_on_button));
+                button.setBackground(getResources().getDrawable(R.drawable.bug_filter_on_button));
             else
-                button.setBackground(getResources().getDrawable(R.drawable.fish_filter_off_button));
+                button.setBackground(getResources().getDrawable(R.drawable.bug_filter_off_button));
             button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     boolean tf = !sort.get(key);
@@ -389,16 +386,16 @@ public class Fish extends AppCompatActivity
                         int i = 0;
                         for (Map.Entry<String, Boolean> s : sort.entrySet()) {
                             Button b = sortButtons.get(i);
-                            b.setBackground(getResources().getDrawable(R.drawable.fish_filter_off_button));
+                            b.setBackground(getResources().getDrawable(R.drawable.bug_filter_off_button));
                             sort.put(s.getKey(), false);
                             i++;
                         }
                         // then set this button to be selected
-                        DocSnapToData.sortHashMapByIndex(fish, key);
-                        DocSnapToData.sortHashMapByIndex(fishCopy, key);
+                        //DocSnapToData.sortHashMapByIndex(bug, key);
+                        //DocSnapToData.sortHashMapByIndex(bugCopy, key);
                         adapter.notifyDataSetChanged();
                         sort.put(key, true);
-                        v.setBackground(getResources().getDrawable(R.drawable.fish_filter_on_button));
+                        v.setBackground(getResources().getDrawable(R.drawable.bug_filter_on_button));
                     }
                 }
             });
@@ -409,22 +406,56 @@ public class Fish extends AppCompatActivity
 
     private void setFilters() {
         // Adding child data List one
-        locations.put("Pier", false);
-        locations.put("Pond", false);
-        locations.put("River", false);
-        locations.put("River (Clifftop)", false);
-        locations.put("River (Clifftop) Pond", false);
-        locations.put("River (Mouth)", false);
-        locations.put("Sea", false);
-        locations.put("Sea (Raining)", false);
+        locations.put("Coconut Trees", false);
+        locations.put("Trees", false);
+        locations.put("Tree Stumps", false);
+        locations.put("Shaking Trees", false);
+        locations.put("Ground", false);
+        locations.put("Ground (Rolling Snowballs)", false);
+        locations.put("Underground", false);
+        locations.put("Flowers", false);
+        locations.put("Flowers (White)", false);
+        locations.put("Rivers and Ponds", false);
+        locations.put("Flying", false);
+        locations.put("Flying (Hybrid Flowers)", false);
+        locations.put("Flying (Light)", false);
+        locations.put("Hitting Rocks", false);
+        locations.put("Rocks and Bushes (Rain)", false);
+        locations.put("Beach Rocks", false);
+        locations.put("Villager's Heads", false);
+        locations.put("Disguised (Shell)", false);
+        locations.put("Disguised (Leaf)", false);
+        locations.put("Rotten Food", false);
+        locations.put("Trash Items", false);
+
 
 
         // Adding child data List two
+        times.put("1", false);
+        times.put("2", false);
+        times.put("3", false);
+        times.put("4", false);
+        times.put("5", false);
+        times.put("6", false);
+        times.put("7", false);
+        times.put("8", false);
+        times.put("9", false);
+        times.put("10", false);
+        times.put("11", false);
+        times.put("12", false);
+        times.put("13", false);
+        times.put("14", false);
+        times.put("15", false);
+        times.put("16", false);
+        times.put("17", false);
+        times.put("18", false);
+        times.put("19", false);
+        times.put("20", false);
+        times.put("21", false);
+        times.put("22", false);
+        times.put("23", false);
+        times.put("24", false);
         times.put("All Day", false);
-        times.put("4 AM - 9 PM", false);
-        times.put("9 AM - 4 PM", false);
-        times.put("4 PM - 9 AM", false);
-        times.put("9 PM - 4 AM", false);
 
 
         // Adding child data List three
@@ -441,16 +472,6 @@ public class Fish extends AppCompatActivity
         months.put("NOV", false);
         months.put("DEC", false);
 
-        // Adding child data for shadow size
-        shadow.put("1", false);
-        shadow.put("2", false);
-        shadow.put("3", false);
-        shadow.put("4", false);
-        shadow.put("5", false);
-        shadow.put("6", false);
-        shadow.put("6 (Fin)", false);
-        shadow.put("Narrow", false);
-
         caughtFilter.put("Caught", false);
         caughtFilter.put("Not Caught", false);
         caughtFilter.put("Donated", false);
@@ -459,8 +480,7 @@ public class Fish extends AppCompatActivity
         filterChild.put(filterParent.get(0), locations); // Header, Child data
         filterChild.put(filterParent.get(1), times); // Header, Child data
         filterChild.put(filterParent.get(2), months); // Header, Child data
-        filterChild.put(filterParent.get(3), shadow);
-        filterChild.put(filterParent.get(4), caughtFilter);
+        filterChild.put(filterParent.get(3), caughtFilter);
     }
 
     private void createListData(View v) {
@@ -473,20 +493,18 @@ public class Fish extends AppCompatActivity
             filterParent.add("Locations");
             filterParent.add("Times");
             filterParent.add("Months");
-            filterParent.add("Shadow Sizes");
             filterParent.add("Blathers");
 
             locations = new LinkedHashMap<>();
             times = new LinkedHashMap<>();
             months = new LinkedHashMap<>();
-            shadow = new LinkedHashMap<>();
             caughtFilter = new LinkedHashMap<>();
 
             setFilters();
 
             listAdapter = new ExpandableListAdapter(getApplicationContext(), filterParent, filterChild,
-                    adapter, fish, isNorth, fishCopy, caught, donated, R.color.fishBackground, R.drawable.fish_filter_on_button,
-                    R.drawable.fish_filter_off_button);
+                    adapter, bug, isNorth, bugCopy, caught, donated, R.color.bugBackground, R.drawable.bug_filter_on_button,
+                    R.drawable.bug_filter_off_button);
         }
         if (listHeight <= 0 && v != null ) {
             setExpandableHeight(listAdapter, list_view); // set the height of the list view
@@ -495,7 +513,7 @@ public class Fish extends AppCompatActivity
 
             list_view.setAdapter(listAdapter);
 
-            NestedScrollView scroll = v.findViewById(R.id.fishScroll);
+            NestedScrollView scroll = v.findViewById(R.id.bugScroll);
             ConstraintLayout.LayoutParams param = (ConstraintLayout.LayoutParams) list_view.getLayoutParams();
             param.height = listHeight;
             list_view.setLayoutParams(param);
@@ -504,8 +522,8 @@ public class Fish extends AppCompatActivity
         }
     }
 
-    private void getFish() {
-        DocumentReference docRef = db.collection("trackables").document("fish");
+    private void getbug() {
+        DocumentReference docRef = db.collection("trackables").document("bug");
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -513,9 +531,12 @@ public class Fish extends AppCompatActivity
                     DocumentSnapshot doc = task.getResult();
                     if (doc.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + doc.getData());
-                        fish.putAll(doc.getData());
-                        DocSnapToData.sortHashMapByIndex(fish, "Default");
-                        fishCopy.putAll(fish);
+                        for (String key : doc.getData().keySet()) {
+                            Bug b = new Bug((HashMap<String, Object>) doc.getData().get(key), key);
+                            bug.add(b);
+                        }
+                        //DocSnapToData.sortHashMapByIndex(bug, "Default");
+                        bugCopy.addAll(bug);
                         adapter.notifyDataSetChanged();
                     } else {
                         Log.d(TAG, "No such document");
@@ -546,9 +567,9 @@ public class Fish extends AppCompatActivity
                 }
             }
         });
-        final DocumentReference fishRef = db.collection("users").document(user.getUid())
-                .collection("fish").document("caught");
-        fishRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        final DocumentReference bugRef = db.collection("users").document(user.getUid())
+                .collection("bug").document("caught");
+        bugRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -558,7 +579,7 @@ public class Fish extends AppCompatActivity
                         caught.putAll(doc.getData());
                         adapter.notifyDataSetChanged();
                     } else {
-                        fishRef.set(new HashMap<>());
+                        bugRef.set(new HashMap<>());
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -566,7 +587,7 @@ public class Fish extends AppCompatActivity
             }
         });
         final DocumentReference donatedRef = db.collection("users").document(user.getUid())
-                .collection("fish").document("donated");
+                .collection("bug").document("donated");
         donatedRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -587,7 +608,7 @@ public class Fish extends AppCompatActivity
     }
 
     private void hideKeyboard(View view) {
-        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Fish.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(BugActivity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
@@ -626,10 +647,10 @@ public class Fish extends AppCompatActivity
         if (id == R.id.nav_home) {
             Intent intent = new Intent(this, CalendarActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_bug) {
-            Intent intent = new Intent(this, Bug.class);
-            startActivity(intent);
         } else if (id == R.id.nav_fish) {
+            Intent intent = new Intent(this, FishActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_bug) {
 
         } else if (id == R.id.nav_fossil) {
 
@@ -650,11 +671,12 @@ public class Fish extends AppCompatActivity
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         Log.w(TAG, "Logged out");
-                        Intent intent = new Intent(Fish.this,
+                        Intent intent = new Intent(BugActivity.this,
                                 MainActivity.class);
                         startActivity(intent);
                         FirebaseAuth.getInstance().signOut();
                     }
                 });
     }
+
 }

@@ -652,10 +652,10 @@ public class CalendarActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             // Handle the camera action
         } else if (id == R.id.nav_bug) {
-            Intent intent = new Intent(this, Bug.class);
+            Intent intent = new Intent(this, BugActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_fish) {
-            Intent intent = new Intent(this, Fish.class);
+            Intent intent = new Intent(this, FishActivity.class);
             startActivity(intent);
         }else if (id == R.id.nav_fossil) {
 

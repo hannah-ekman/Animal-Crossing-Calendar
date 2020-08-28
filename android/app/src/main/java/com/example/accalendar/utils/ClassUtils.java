@@ -95,10 +95,21 @@ public class ClassUtils {
     public static abstract class Trackable {
         public String name;
         public String image;
+
+        public void fillKeyValues(HashMap<String, Object> values) {
+            values.put("name", name);
+            values.put("image", image);
+        }
     }
 
     public static abstract class Discoverable extends Trackable {
         public int price;
+
+        @Override
+        public void fillKeyValues(HashMap<String, Object> values) {
+            super.fillKeyValues(values);
+            values.put("price", String.valueOf(price));
+        }
     }
 
     public static abstract class Catchable extends Discoverable {
@@ -116,6 +127,61 @@ public class ClassUtils {
                 parsed.add(times);
             }
             return parsed;
+        }
+
+        public String get(String value) {
+            if ("Locations".equals(value)) {
+                return location;
+            }
+            return null;
+        }
+
+        public void fillKeyValues(HashMap<String, Object> values, boolean isNorth) {
+            super.fillKeyValues(values);
+            values.put("location", location);
+            if(isNorth)
+                values.put("months", fillMonthBools(north));
+            else
+                values.put("months", fillMonthBools(south));
+            values.put("times", fillTimeBools(times));
+        }
+
+        private boolean[] fillMonthBools(ArrayList<ClassUtils.Available> months) {
+            int monthStart, monthEnd;
+            boolean[] monthBools = new boolean[12];
+            for (int i = 0; i < 12; i++)
+                monthBools[i] = false;
+            for (int monthIdx = 0; monthIdx < months.size(); monthIdx++) {
+                monthStart = months.get(monthIdx).start;
+                monthEnd = months.get(monthIdx).end;
+                for (int i = monthStart; i <= monthEnd; i++)
+                    monthBools[i - 1] = true;
+            }
+            return monthBools;
+        }
+
+        // Sets the times the fish is available to 1 and the rest to 0 -> used in the TimeView
+        private int[] fillTimeBools(ArrayList<ClassUtils.Available> times) {
+            int startTime, endTime;
+            int[] timeBools = new int[25];
+            for (int i = 0; i < 25; i++)
+                timeBools[i] = 0;
+            // Iterate through each time in the array (this was to deal with the piranha lol)
+            for (int timeIdx = 0; timeIdx < times.size(); timeIdx++) {
+                startTime = times.get(timeIdx).start;
+                endTime = times.get(timeIdx).end;
+                // If startTime is before endTime -> fill all times from start to end with 1
+                if (startTime <= endTime) {
+                    for (int i = startTime; i <= endTime; i++)
+                        timeBools[i] = 1;
+                } else { // start is after end -> fill all times before start and times after end with 1
+                    for (int i = 0; i <= endTime; i++)
+                        timeBools[i] = 1;
+                    for (int i = startTime; i < 25; i++)
+                        timeBools[i] = 1;
+                }
+            }
+            return timeBools;
         }
     }
 
@@ -316,8 +382,65 @@ public class ClassUtils {
 
         public void setButtonOnClick(ImageButton b, final Map<String, Object> docData, final DocumentReference docRef,
                                      Boolean value, final Context context, final IdKeyPair idKeyPair, final String name,
+                                     final Object month, final Object day, final ImageView bg, final int icon, final int unIcon,
+                                     final boolean isSpecial) {
+            setDrawable(value, context, b, idKeyPair);
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    boolean isChecked = updateChecked(docData, name, isSpecial, month, day, docRef,
+                            context, view, idKeyPair);
+                    if (isChecked) {
+                        Glide.with(context).load(icon).into(bg);
+                    } else {
+                        Glide.with(context).clear(bg);
+                    }
+                }
+            });
+        }
+
+        public void setButtonOnClick(ImageButton b, final Map<String, Object> docData, final DocumentReference docRef,
+                                     Boolean value, final Context context, final IdKeyPair idKeyPair, final String name,
                                      final Object month, final Object day, final View bg, final int icon, final int unIcon,
                                      final boolean isSpecial) {
+            setDrawable(value, context, b, idKeyPair);
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    boolean isChecked = updateChecked(docData, name, isSpecial, month, day, docRef,
+                            context, view, idKeyPair);
+                    if (isChecked) {
+                        bg.setBackgroundResource(icon);
+                    } else {
+                        bg.setBackgroundResource(unIcon);
+                    }
+                }
+            });
+        }
+
+        private boolean updateChecked(Map<String, Object> docData, String name, boolean isSpecial,
+                                      final Object month, final Object day, DocumentReference docRef,
+                                      Context context, View b, IdKeyPair idKeyPair) {
+            Map<String, Object> checked = new HashMap<>();
+            boolean isChecked = !(Boolean) docData.get(name);
+            docData.put(name, isChecked);
+            if (isChecked && isSpecial) {
+                checked.put(name, new HashMap<String, Object>() {{
+                    put("month", month);
+                    put("day", day);
+                }});
+            } else if (isChecked)
+                checked.put(name, true);
+            else if (isSpecial)
+                checked.put(name, FieldValue.delete());
+            else
+                checked.put(name, false);
+            docRef.update(checked);
+            setDrawable(isChecked, context, (ImageButton) b, idKeyPair);
+            return isChecked;
+        }
+
+        private void setDrawable(Boolean value, Context context, ImageButton b, final IdKeyPair idKeyPair) {
             if (value) {
                 Drawable d = ResourcesCompat.getDrawable(
                         context.getResources(), idKeyPair.getSelectedBG(), null);
@@ -327,37 +450,6 @@ public class ClassUtils {
                         context.getResources(), idKeyPair.getUnselectedBG(), null);
                 b.setBackground(d);
             }
-            b.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Map<String, Object> checked = new HashMap<>();
-                    boolean isChecked = !(Boolean) docData.get(name);
-                    docData.put(name, isChecked);
-                    if (isChecked && isSpecial) {
-                        checked.put(name, new HashMap<String, Object>() {{
-                            put("month", month);
-                            put("day", day);
-                        }});
-                    } else if (isChecked)
-                        checked.put(name, true);
-                    else if (isSpecial)
-                        checked.put(name, FieldValue.delete());
-                    else
-                        checked.put(name, false);
-                    docRef.update(checked);
-                    if (isChecked) {
-                        bg.setBackgroundResource(icon);
-                        Drawable d = ResourcesCompat.getDrawable(
-                                context.getResources(), idKeyPair.getSelectedBG(), null);
-                        view.setBackground(d);
-                    } else {
-                        bg.setBackgroundResource(unIcon);
-                        Drawable d = ResourcesCompat.getDrawable(
-                                context.getResources(), idKeyPair.getUnselectedBG(), null);
-                        view.setBackground(d);
-                    }
-                }
-            });
         }
     }
 

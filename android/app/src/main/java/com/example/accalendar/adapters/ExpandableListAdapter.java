@@ -8,6 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.example.accalendar.R;
+import com.example.accalendar.utils.Art;
+import com.example.accalendar.utils.ClassUtils;
+import com.example.accalendar.utils.DeepSea;
+import com.example.accalendar.utils.Fish;
+import com.example.accalendar.utils.Villager;
 import com.example.accalendar.views.FilterView;
 import com.google.android.flexbox.FlexboxLayout;
 
@@ -32,10 +37,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private HashMap<Integer, View> views = new HashMap<>();
     private HashMap<Integer, View> groupViews = new HashMap<>();
     private RecyclerviewAdapter adapter;
-    private Map<String, Object> fish;
+    private ArrayList<Object> items;
     private ArrayList<Boolean> isNorth;
     private int filterCount = 0;
-    private Map<String, Object> fishCopy;
+    private ArrayList<Object> itemsCopy;
     private Map<String, Object> caught;
     private Map<String, Object> donated;
     private Map<String, Integer> monthInts = new HashMap<>();
@@ -46,16 +51,16 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, HashMap<String, Boolean>> listChildData,
-                                 RecyclerviewAdapter adapter, Map<String, Object> fish, ArrayList<Boolean> isNorth,
-                                 Map<String, Object> fishCopy, Map<String, Object> caught, Map<String, Object> donated,
+                                 RecyclerviewAdapter adapter, ArrayList<Object> items, ArrayList<Boolean> isNorth,
+                                 ArrayList<Object> itemsCopy, Map<String, Object> caught, Map<String, Object> donated,
                                  int tabColor, int buttonOnDrawable, int buttonOffDrawable) {
         this._context = context;
         this._listDataHeader = listDataHeader;
         this._listDataChild = listChildData;
         this.adapter = adapter;
-        this.fish = fish;
+        this.items = items;
+        this.itemsCopy = itemsCopy;
         this.isNorth = isNorth;
-        this.fishCopy = fishCopy;
         this.caught = caught;
         this.donated = donated;
         this.tabColor = tabColor;
@@ -201,56 +206,32 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     public void filter() {
-        fish.clear();
+        items.clear();
         System.out.println(query);
         if(filterCount == 0) {
             if (query.equals("")) {
-                fish.putAll(fishCopy);
+                items.addAll(itemsCopy);
             } else {
-                for (Map.Entry<String, Object> f : fishCopy.entrySet()) {
-                    String fishName = f.getKey();
+                for (int i = 0; i<itemsCopy.size(); i++) {
+                    ClassUtils.Trackable t = (ClassUtils.Trackable) itemsCopy.get(i);
+                    String fishName = t.name;
                     System.out.println(fishName.toLowerCase().contains(query));
                     if(fishName.contains(query)) {
-                        fish.put(fishName, f.getValue());
+                        items.add(t);
                     }
                 }
             }
             adapter.notifyDataSetChanged();
             return;
         }
-        for(Map.Entry<String, Object> f : fishCopy.entrySet()) {
-            Map<String, Object> fishData = (Map<String, Object>) f.getValue();
-            String fishName = f.getKey();
+        for(int i = 0; i<itemsCopy.size(); i++) {
+            ClassUtils.Trackable t = (ClassUtils.Trackable) itemsCopy.get(i);
+            String fishName = t.name;
             fishName = fishName.toLowerCase();
             boolean overallValid = true;
             if(fishName.contains(query)){
                 for(Map.Entry<String, HashMap<String, Boolean>> filterGroup : _listDataChild.entrySet()) {
                     String group = filterGroup.getKey();
-                    String key;
-                    if (group == "Locations")
-                        key = "location";
-                    else if (group == "Birthday Months")
-                        key = "month";
-                    else if (group == "Personalities")
-                        key = "personality";
-                    else if (group == "Hobbies")
-                        key = "hobby";
-                    else if (group == "Species")
-                        key = "species";
-                    else if (group == "Times")
-                        key = "times";
-                    else if (group == "Shadow Sizes")
-                        key = "shadow size";
-                    else if (group == "Blathers" || group == "Residents")
-                        key = "caught";
-                    else if (group == "Genders")
-                        key = "gender";
-                    else {
-                        if (isNorth.get(0))
-                            key = "north";
-                        else
-                            key = "south";
-                    }
                     Map<String, Boolean> filters = filterGroup.getValue();
                     boolean isValid = false;
                     boolean hasFilter = false;
@@ -259,43 +240,48 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         String value = filter.getKey();
                         if (tf) {
                             hasFilter = true;
-                            if (key == "times" || key == "north" || key == "south") {
-                                ArrayList<Map<String, Long>> times = (ArrayList<Map<String, Long>>) fishData.get(key);
-                                for (int i = 0; i < times.size(); i++) {
-                                    Map<String, Long> time = times.get(i);
-                                    if (key == "north" || key == "south") { // this is a month
-                                        if (time.get("start") < time.get("end"))
-                                            if (time.get("start") <= monthInts.get(value) && time.get("end") >= monthInts.get(value))
+                            if (group.equals("Times") || group.equals("Months")) {
+                                ArrayList<ClassUtils.Available> times = ((ClassUtils.Catchable) t).times;
+                                if(group.equals("Months") && isNorth.get(0))
+                                    times = ((ClassUtils.Catchable) t).north;
+                                else if (group.equals("Months"))
+                                    times = ((ClassUtils.Catchable) t).south;
+
+                                for (int j = 0; j < times.size(); j++) {
+                                    ClassUtils.Available time = times.get(j);
+                                    if (group.equals("Months")) {
+                                        if (time.start < time.end)
+                                            if (time.start <= monthInts.get(value) && time.end >= monthInts.get(value))
                                                 isValid = true;
                                     } else { // this is a time
                                         if (value.equals("All Day")) {
-                                            if (time.get("start") == 0 && time.get("end") == 24)
+                                            if (time.start == 0 && time.end == 24)
                                                 isValid = true;
                                         } else if (value.equals("4 AM - 9 PM")) {
-                                            if (time.get("start") == 4 && time.get("end") == 21)
+                                            if (time.start == 4 && time.end == 21)
                                                 isValid = true;
                                         } else if (value.equals("4 PM - 9 AM")) {
-                                            if (time.get("start") == 16 && time.get("end") == 9)
+                                            if (time.start == 16 && time.end == 9)
                                                 isValid = true;
                                         } else if (value.equals("9 AM - 4 PM")) {
-                                            if (time.get("start") == 9 && time.get("end") == 16)
+                                            if (time.start == 9 && time.end == 16)
                                                 isValid = true;
                                         } else if (value.equals("9 PM - 4 AM")) {
-                                            if (time.get("start") == 21 && time.get("end") == 4)
+                                            if (time.start == 21 && time.end == 4)
                                                 isValid = true;
-                                        }else if(time.get("start") < time.get("end")) {
-                                            if (time.get("start") <= timeInts.get(value) && time.get("end") >= timeInts.get(value))
+                                        }else if(time.start < time.end) {
+                                            if (time.start <= timeInts.get(value) && time.end >= timeInts.get(value))
                                                 isValid = true;
                                         } else {
-                                            if (time.get("start") <= timeInts.get(value) || time.get("end") >= timeInts.get(value))
+                                            if (time.start <= timeInts.get(value) || time.end >= timeInts.get(value))
                                                 isValid = true;
                                         }
                                     }
                                 }
-                            } else if (key == "caught") {
-                                if(caught.containsKey(f.getKey()) && donated.containsKey(f.getKey())) {
-                                    boolean hasCaught = (boolean) caught.get(f.getKey());
-                                    boolean hasDonated = (boolean) donated.get(f.getKey());
+                            } else if (group.equals("Blathers") || group.equals("Residents")) {
+                                if(caught.containsKey(t.name) && donated.containsKey(t.name)) {
+                                    boolean hasCaught = (boolean) caught.get(t.name);
+                                    boolean hasDonated = (boolean) donated.get(t.name);
                                     if ((value.equals("Caught") || value.equals("Resident")) && hasCaught)
                                         isValid = true;
                                     else if ((value.equals("Not Caught") || value.equals("Not Resident")) && !hasCaught)
@@ -310,13 +296,24 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                     else if (value.equals("Not Donated") || value.equals("Not Dreamie"))
                                         isValid = true;
                                 }
-                            } else if (key == "month") {
-                                int curValue = ((Long) fishData.get(key)).intValue();
+                            } else if (group.equals("Birthday Months")) {
+                                Villager v = (Villager) t;
+                                int curValue = v.birthday.month;
                                 if (curValue == monthInts.get(value))
                                     isValid = true;
                             } else {
-                                String fishValue = (String) fishData.get(key);
-                                if (fishValue.equals(value))
+                                String itemValue = "";
+                                if (t instanceof Fish)
+                                    itemValue = ((Fish) t).get(group);
+                                else if (t instanceof DeepSea)
+                                    itemValue = ((DeepSea) t).get(group);
+                                else if (t instanceof Art)
+                                    itemValue = ((Art) t).get(group);
+                                else if (t instanceof Villager)
+                                    itemValue = ((Villager) t).get(group);
+                                else if (t instanceof ClassUtils.Catchable)
+                                    itemValue = ((ClassUtils.Catchable) t).get(group);
+                                if (itemValue.equals(value))
                                     isValid = true;
                             }
                         }
@@ -327,7 +324,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     }
                 }
                 if (overallValid)
-                    fish.put(f.getKey(), fishData);
+                    items.add(t);
             }
         }
         adapter.notifyDataSetChanged();

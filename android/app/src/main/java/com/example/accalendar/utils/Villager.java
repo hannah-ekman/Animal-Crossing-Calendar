@@ -1,8 +1,9 @@
 package com.example.accalendar.utils;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Villager extends ClassUtils.Trackable {
-    public ClassUtils.Date birthday;
+    public ClassUtils.Date birthday = new ClassUtils.Date();
     public String catchphrase;
     public String personality;
     public String species;
@@ -17,6 +18,32 @@ public class Villager extends ClassUtils.Trackable {
         this.species = data.get("species").toString();
         this.hobby = data.get("hobby").toString();
         this.image = data.get("image").toString();
-        this.gender = data.get("gender").toString();
+        // get the updated web scraping from Charles, gender is missing
+        //this.gender = data.get("gender").toString();
+    }
+    @Override
+    public void fillKeyValues(HashMap<String, Object> values) {
+        super.fillKeyValues(values);
+        values.put("birthday", birthday.month + "/" + birthday.day);
+        values.put("catchphrase", catchphrase);
+        values.put("personality", personality);
+        values.put("species", species);
+        values.put("hobby", hobby);
+        values.put("gender", gender);
+    }
+
+    public String get(String value) {
+        switch (value) {
+            case "Personalities":
+                return personality;
+            case "Hobbies":
+                return hobby;
+            case "Species":
+                return species;
+            case "Genders":
+                return gender;
+            default:
+                return null;
+        }
     }
 }

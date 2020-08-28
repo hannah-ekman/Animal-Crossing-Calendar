@@ -16,4 +16,19 @@ public class DeepSea extends ClassUtils.Catchable {
         this.times = ParseTimeHash(((ArrayList<HashMap<String, Object>>) data.get("times")));
         this.swimPattern = data.get("swim pattern").toString();
     }
+    @Override
+    public void fillKeyValues(HashMap<String, Object> values, boolean isNorth) {
+        super.fillKeyValues(values, isNorth);
+        values.put("swim pattern", swimPattern);
+    }
+    @Override
+    public String get(String value) {
+        String s = super.get(value);
+        if (s == null) {
+            if ("Swim Patterns".equals(value)) {
+                return swimPattern;
+            }
+        }
+        return s;
+    }
 }

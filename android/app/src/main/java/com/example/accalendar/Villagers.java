@@ -43,7 +43,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.accalendar.utils.ClassUtils;
-import com.example.accalendar.utils.DocSnapToData;
 import com.example.accalendar.utils.Villager;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -77,8 +76,8 @@ public class Villagers extends AppCompatActivity
     RecyclerviewAdapter adapter;
     ExpandableListAdapter listAdapter;
     private FirebaseFirestore db;
-    private Map<String, Object> villagers = new LinkedHashMap<>();
-    private Map<String, Object> villagersCopy = new LinkedHashMap<>();
+    private ArrayList<Object> villagers = new ArrayList<>();
+    private ArrayList<Object> villagersCopy = new ArrayList<>();
     private ArrayList<Boolean> isNorth = new ArrayList<>();
     private Map<String, Object> resident = new HashMap<>();
     private Map<String, Object> dreamie = new HashMap<>();
@@ -442,8 +441,8 @@ public class Villagers extends AppCompatActivity
                             i++;
                         }
                         // then set this button to be selected
-                        DocSnapToData.sortHashMapByIndex(villagers, key);
-                        DocSnapToData.sortHashMapByIndex(villagersCopy, key);
+                        //DocSnapToData.sortHashMapByIndex(villagers, key);
+                       //DocSnapToData.sortHashMapByIndex(villagersCopy, key);
                         adapter.notifyDataSetChanged();
                         sort.put(key, true);
                         v.setBackground(getResources().getDrawable(R.drawable.fish_filter_on_button));
@@ -595,16 +594,13 @@ public class Villagers extends AppCompatActivity
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
-                        //Villager v = new Villager(document.getData(), document.getId());
-                        villagers.put(document.getId(), document.getData());
+                        Villager v = new Villager(document.getData(), document.getId());
+                        villagers.add(v);
                     }
-                    for (String key : villagers.keySet()) {
-                        final Map<String, Object> entry = (Map<String, Object>) villagers.get(key);
-                        String url = "";
-                        if (entry.containsKey("image"))
-                            url = (String) entry.get("image");
+                    for (int i = 0; i<villagers.size(); i++) {
+                        Villager v = (Villager) villagers.get(i);
                         Glide.with(Villagers.this)
-                                .load(url)
+                                .load(v.image)
                                 .dontAnimate()
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                                 .encodeFormat(Bitmap.CompressFormat.PNG)
@@ -612,7 +608,7 @@ public class Villagers extends AppCompatActivity
                                 .centerCrop()
                                 .preload();
                     }
-                    villagersCopy.putAll(villagers);
+                    villagersCopy.addAll(villagers);
                     adapter.notifyDataSetChanged();
                 } else {
                 Log.d(TAG, "get failed with ", task.getException());
@@ -724,7 +720,7 @@ public class Villagers extends AppCompatActivity
             Intent intent = new Intent(this, CalendarActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_bug) {
-            Intent intent = new Intent(this, Bug.class);
+            Intent intent = new Intent(this, BugActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_fish) {
 
