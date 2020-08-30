@@ -10,6 +10,7 @@ public class Villager extends ClassUtils.Trackable {
     public String hobby;
     public String gender;
     public Villager(Map<String, Object> data, String name) {
+        this.index = ((Long) data.get("index")).intValue();
         this.name = name;
         this.birthday.day = ((Long) data.get("day")).intValue();
         this.birthday.month = ((Long) data.get("month")).intValue();

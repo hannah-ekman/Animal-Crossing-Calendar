@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.accalendar.utils.ClassUtils;
+import com.example.accalendar.utils.DocSnapToData;
 import com.example.accalendar.utils.Villager;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -441,8 +442,8 @@ public class Villagers extends AppCompatActivity
                             i++;
                         }
                         // then set this button to be selected
-                        //DocSnapToData.sortHashMapByIndex(villagers, key);
-                       //DocSnapToData.sortHashMapByIndex(villagersCopy, key);
+                        DocSnapToData.sortByAttribute(villagers, key);
+                        DocSnapToData.sortByAttribute(villagersCopy, key);
                         adapter.notifyDataSetChanged();
                         sort.put(key, true);
                         v.setBackground(getResources().getDrawable(R.drawable.fish_filter_on_button));

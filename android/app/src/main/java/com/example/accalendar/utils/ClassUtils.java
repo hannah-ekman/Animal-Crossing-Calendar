@@ -95,6 +95,7 @@ public class ClassUtils {
     public static abstract class Trackable {
         public String name;
         public String image;
+        public int index;
 
         public void fillKeyValues(HashMap<String, Object> values) {
             values.put("name", name);

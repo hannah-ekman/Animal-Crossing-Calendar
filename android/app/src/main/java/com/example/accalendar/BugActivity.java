@@ -42,6 +42,7 @@ import com.example.accalendar.adapters.ExpandableListAdapter;
 import com.example.accalendar.adapters.RecyclerviewAdapter;
 import com.example.accalendar.utils.Bug;
 import com.example.accalendar.utils.ClassUtils;
+import com.example.accalendar.utils.DocSnapToData;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -391,8 +392,8 @@ public class BugActivity extends AppCompatActivity
                             i++;
                         }
                         // then set this button to be selected
-                        //DocSnapToData.sortHashMapByIndex(bug, key);
-                        //DocSnapToData.sortHashMapByIndex(bugCopy, key);
+                        DocSnapToData.sortByAttribute(bug, key);
+                        DocSnapToData.sortByAttribute(bugCopy, key);
                         adapter.notifyDataSetChanged();
                         sort.put(key, true);
                         v.setBackground(getResources().getDrawable(R.drawable.bug_filter_on_button));
@@ -535,7 +536,7 @@ public class BugActivity extends AppCompatActivity
                             Bug b = new Bug((HashMap<String, Object>) doc.getData().get(key), key);
                             bug.add(b);
                         }
-                        //DocSnapToData.sortHashMapByIndex(bug, "Default");
+                        DocSnapToData.sortByAttribute(bug, "Default");
                         bugCopy.addAll(bug);
                         adapter.notifyDataSetChanged();
                     } else {

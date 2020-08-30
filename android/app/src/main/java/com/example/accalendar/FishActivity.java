@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.accalendar.utils.ClassUtils;
+import com.example.accalendar.utils.DocSnapToData;
 import com.example.accalendar.utils.Fish;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -394,8 +395,8 @@ public class FishActivity extends AppCompatActivity
                             i++;
                         }
                         // then set this button to be selected
-                        //DocSnapToData.sortHashMapByIndex(fish, key);
-                        //DocSnapToData.sortHashMapByIndex(fishCopy, key);
+                        DocSnapToData.sortByAttribute(fish, key);
+                        DocSnapToData.sortByAttribute(fishCopy, key);
                         adapter.notifyDataSetChanged();
                         sort.put(key, true);
                         v.setBackground(getResources().getDrawable(R.drawable.fish_filter_on_button));
@@ -517,7 +518,7 @@ public class FishActivity extends AppCompatActivity
                             Fish f = new Fish((HashMap<String, Object>) doc.getData().get(key), key);
                             fish.add(f);
                         }
-                        //DocSnapToData.sortHashMapByIndex(fish, "Default");
+                        DocSnapToData.sortByAttribute(fish, "Default");
                         fishCopy.addAll(fish);
                         adapter.notifyDataSetChanged();
                     } else {

@@ -10,6 +10,7 @@ public class Art extends ClassUtils.Discoverable {
     public String fake;
     public String tip;
     public Art(Map<String, Object> data, String name) {
+        this.index = ((Long) data.get("index")).intValue();
         this.name = name;
         this.image = data.get("real").toString();
         this.price = ((Long) data.get("price")).intValue();

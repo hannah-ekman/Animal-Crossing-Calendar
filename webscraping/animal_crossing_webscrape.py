@@ -12,6 +12,17 @@ from enum import Enum
 
 #Probably gonna have to make this more generalized so we can use it for bugs as well
 
+personalityDict = {
+        "Normal": "Female",
+        "Peppy": "Female",
+        "Sisterly": "Female",
+        "Snooty": "Female",
+        "Cranky": "Male",
+        "Jock": "Male",
+        "Lazy": "Male",
+        "Smug": "Male"
+    }
+
 Entity = Enum('Entity', 'fish bug fossil deepSea villagers')
 
 cred=credentials.Certificate('./service-account.json') #I'm gitignoring this so that it's not publicly available online, I'll send it to you
@@ -276,6 +287,7 @@ def get_villagers(r, entity):
         catchphrase = str(villagerSoup.find('td', {'class': 'catchphrase'}).contents[0]).strip()
         catchphrase = catchphrase.strip('"')
         hobby = str(villagerSoup.find('td', {'class': 'hobby'}).contents[0]).strip()
+        gender = personalityDict[personality]
         
         url = uploadToFirestore(pic, name, entity)
         villagerInfo = { 
@@ -284,6 +296,7 @@ def get_villagers(r, entity):
             u"species": species,
             u"month": month,
             u"day": day,
+            u"gender": gender,
             u"catchphrase": catchphrase,
             u"hobby": hobby,
             u"index": i

@@ -73,48 +73,28 @@ public class DocSnapToData {
         return events;
     }
 
-    public static void sortHashMapByIndex(Map<String, Object> map, String key) {
-        // Create a list from elements of HashMap
-        List<Map.Entry<String, Object>> list =
-                new ArrayList<>(map.entrySet());
-
-        String sortBy = "index";
-        if(key == "Price")
-            sortBy = "price";
-        else if (key == "Name")
-            sortBy = "name";
-        else if (key == "Catchphrase")
-            sortBy = "catchphrase";
-
-        // Sort the list
-        final String finalSortBy = sortBy;
-        Collections.sort(list, new Comparator<Map.Entry<String, Object>>() {
+    public static void sortByAttribute(ArrayList<Object> toBeSorted, final String key) {
+        Collections.sort(toBeSorted, new Comparator<Object>() {
             @Override
-            public int compare(Map.Entry<String, Object> o1, Map.Entry<String, Object> o2) {
-                if (finalSortBy == "name"){
-                    String fish1 = o1.getKey();
-                    String fish2 = o2.getKey();
-                    return fish1.compareTo(fish2);
-                } else if (finalSortBy == "catchphrase") {
-                    Map<String, Object> fish1 = (Map<String, Object>) o1.getValue();
-                    Map<String, Object> fish2 = (Map<String, Object>) o2.getValue();
-                    String i1 = (String) fish1.get(finalSortBy);
-                    String i2 = (String) fish2.get(finalSortBy);
-                    return (i1.toLowerCase()).compareTo((i2.toLowerCase()));
-                } else {
-                    Map<String, Object> fish1 = (Map<String, Object>) o1.getValue();
-                    Map<String, Object> fish2 = (Map<String, Object>) o2.getValue();
-                    Long i1 = (Long) fish1.get(finalSortBy);
-                    Long i2 = (Long) fish2.get(finalSortBy);
-                    return i1.compareTo(i2);
+            public int compare(Object o1, Object o2) {
+                if (key == "Name"){
+                    ClassUtils.Trackable t1 = (ClassUtils.Trackable) o1;
+                    ClassUtils.Trackable t2 = (ClassUtils.Trackable) o2;
+                    return (t1.name.toLowerCase().compareTo(t2.name.toLowerCase()));
+                } else if (key == "Catchphrase") {
+                    Villager v1 = (Villager) o1;
+                    Villager v2 = (Villager) o2;
+                    return (v1.catchphrase.toLowerCase()).compareTo((v2.catchphrase.toLowerCase()));
+                } else if (key == "Price"){
+                    ClassUtils.Discoverable d1 = (ClassUtils.Discoverable) o1;
+                    ClassUtils.Discoverable d2 = (ClassUtils.Discoverable) o2;
+                    return Integer.valueOf(d1.price).compareTo(Integer.valueOf(d2.price));
+                } else { // default
+                    ClassUtils.Trackable t1 = (ClassUtils.Trackable) o1;
+                    ClassUtils.Trackable t2 = (ClassUtils.Trackable) o2;
+                    return (Integer.valueOf(t1.index).compareTo(Integer.valueOf((t2.index))));
                 }
             }
         });
-
-        // put data from sorted list to hashmap (has to be a linked hashmap otherwise it will not be ordered)
-        map.clear();
-        for (Map.Entry<String, Object> aa : list) {
-            map.put(aa.getKey(), aa.getValue());
-        }
     }
 }
